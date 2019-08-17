@@ -14,15 +14,12 @@ public class Main {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		Panel g = new Panel();
-		Panel.centreWindow(frame);
+		Panel.centerWindow(frame);
 		frame.getContentPane().add(g);
 		
-		Paddle MainPlayer = new Paddle(Definitions.MAIN_PLAYER);
-		Paddle OtherPlayer = new Paddle(Definitions.OTHER_PLAYER);
+		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
+		Paddle otherPlayer = new Paddle(Definitions.OTHER_PLAYER);
 		
-		Model model = new Model(MainPlayer, OtherPlayer, g);
-		frame.repaint();
-		Thread t = new Thread(model);
-		t.run();
+		Model model = new Model(mainPlayer, otherPlayer, g, frame);
 	}
 }
