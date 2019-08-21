@@ -15,7 +15,6 @@ public class Main {
 		
 		Panel panel = new Panel();
 		Panel.centerWindow(frame);
-//		frame.getContentPane().add(frame)
 		frame.add(panel);
 		
 		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);

@@ -9,7 +9,7 @@ public class Paddle extends Component implements PanelElement{
 	private static final long serialVersionUID = 1429077799586317462L;
 	double yVel;
 	boolean upAccel, downAccel;
-	int player, x, y;
+	int player, x, y, score;
 	final int width = 10, height = 100;
 	
 	public Paddle(int player) {
@@ -36,7 +36,7 @@ public class Paddle extends Component implements PanelElement{
 		
 		if (y < 0) y = 0;
 		if (y > 280) y = 280;
-		System.out.println("y " + y + " vel " + yVel);
+		System.out.println("y " + y);
 	}
 	
 	public void setUpAccel(boolean input) {
