@@ -1,0 +1,24 @@
+{
+	"folders": {},
+	"connections": {
+		"postgres-jdbc-16ca9be83c2-659f290b09d4f5f4": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "PostgreSQL - yms-postgres",
+			"save-password": true,
+			"read-only": false,
+			"configuration": {
+				"host": "localhost",
+				"port": "5432",
+				"database": "yms-postgres",
+				"url": "jdbc:postgresql://localhost:5432/yms-postgres",
+				"type": "dev",
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "false",
+					"@dbeaver-show-template-db@": "false"
+				},
+				"handlers": {}
+			}
+		}
+	}
+}

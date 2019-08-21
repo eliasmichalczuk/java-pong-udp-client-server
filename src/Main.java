@@ -13,13 +13,18 @@ public class Main {
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		Panel g = new Panel();
+		Panel panel = new Panel();
 		Panel.centerWindow(frame);
-		frame.getContentPane().add(g);
+//		frame.getContentPane().add(frame)
+		frame.add(panel);
 		
 		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
 		Paddle otherPlayer = new Paddle(Definitions.OTHER_PLAYER);
+		Ball ball = new Ball(panel, mainPlayer, otherPlayer);
 		
-		Model model = new Model(mainPlayer, otherPlayer, g, frame);
+		Model model = new Model(mainPlayer, otherPlayer, panel, frame, ball);
+		
+		GameThread gt = new GameThread(panel);
+		gt.run();
 	}
 }

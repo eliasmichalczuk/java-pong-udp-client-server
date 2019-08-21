@@ -5,20 +5,17 @@ import java.awt.Graphics;
 import java.awt.Point;
 
 public class Paddle extends Component implements PanelElement{
-	
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1429077799586317462L;
 	double yVel;
 	boolean upAccel, downAccel;
 	int player, x, y;
-	private static double GRAVITY = 0.94;
+	final int width = 10, height = 100;
 	
 	public Paddle(int player) {
 		upAccel = false;
 		downAccel = false;
-		y = 210;
+		y = 120;
 		yVel = 0;
 		if (player == Definitions.MAIN_PLAYER) {
 			x = 10;
@@ -59,11 +56,10 @@ public class Paddle extends Component implements PanelElement{
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
+	
 	public void paint(Graphics g) {
 		g.setColor(Color.WHITE);
-		g.fillRect(x, y, 10, 100);
+		g.fillRect(x, y, width, height);
 		setVisible(true);
 	}
 	

@@ -5,34 +5,37 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
 
-public class Model implements KeyListener  {
+public class Model implements KeyListener, ActionListener  {
 	
 	private Paddle mainPlayer;
 	private Panel panel;
 	private JFrame frame;
 	private Paddle otherPlayer;
+	private Ball ball;
 	
-	public Model(Paddle mainPlayer, Paddle otherPlayer, Panel panel, JFrame frame) {
+	public Model(Paddle mainPlayer, Paddle otherPlayer, Panel panel, JFrame frame, Ball ball) {
 		this.mainPlayer = mainPlayer;
 		this.panel = panel;
 		this.frame = frame;
 		this.otherPlayer = otherPlayer;
+		this.ball = ball;
 		this.attach();
 	}
-
-	public void run() {
-		
-			
-			mainPlayer.move();
-			panel.repaint();
-		
-	}
 	
+	@Override
+	public void keyTyped(KeyEvent e) {
+		mainPlayer.move();
+		otherPlayer.move();
+//		panel.repaint();
+	}
+
 	private void attach() {
 		this.panel.addChildrenElement(mainPlayer);
 		this.panel.addChildrenElement(otherPlayer);
+		this.panel.addChildrenElement(ball);
 		this.frame.add(mainPlayer);
 		this.frame.add(otherPlayer);
+		this.frame.add(ball);
 		frame.addKeyListener(this);
 	}
 	
@@ -49,7 +52,6 @@ public class Model implements KeyListener  {
 			mainPlayer.setDownAccel(true);
 			otherPlayer.setDownAccel(true);
 		}
-		
 	}
 
 	@Override
@@ -66,10 +68,7 @@ public class Model implements KeyListener  {
 	}
 
 	@Override
-	public void keyTyped(KeyEvent e) {
-		mainPlayer.move();
-		otherPlayer.move();
-		panel.repaint();
+	public void actionPerformed(ActionEvent e) {
+//		panel.repaint();
 	}
-	
 }
