@@ -13,12 +13,13 @@ public class Main {
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		Panel panel = new Panel();
-		Panel.centerWindow(frame);
-		frame.add(panel);
+
 		
 		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
 		Paddle otherPlayer = new Paddle(Definitions.OTHER_PLAYER);
+		Panel panel = new Panel(mainPlayer, otherPlayer);
+		Panel.centerWindow(frame);
+		frame.add(panel);
 		Ball ball = new Ball(panel, mainPlayer, otherPlayer);
 		
 		Model model = new Model(mainPlayer, otherPlayer, panel, frame, ball);

@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -19,8 +20,12 @@ public class Panel extends JPanel{
 	Rectangle bounds;
 	
 	private List<PanelElement> children = new ArrayList<PanelElement>();
+	private Paddle otherPlayer;
+	private Paddle mainPlayer;
 	
-	public Panel() {
+	public Panel(Paddle mainPlayer, Paddle otherPlayer) {
+		this.mainPlayer = mainPlayer;
+		this.otherPlayer = otherPlayer;
 		setBackground(Color.BLACK);
         bounds = new Rectangle(0, 0, width, height);
 		setVisible(true);
@@ -45,6 +50,10 @@ public class Panel extends JPanel{
         for (PanelElement panelElement : this.children) {
         	panelElement.paint(g);
 		}
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", 1, 20));
+        g.drawString("You      Rival", 330, 15);
+        g.drawString("" + this.mainPlayer.getScore() + "               " + this.otherPlayer.getScore(), 330, 45);
     }
 
 }
