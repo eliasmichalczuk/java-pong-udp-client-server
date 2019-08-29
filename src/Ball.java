@@ -10,7 +10,7 @@ public class Ball extends Component implements PanelElement {
 	private double x, motionX, motionY, speed = 5;
 	public Random random;
 	public int amountOfHits;
-	private final double angleCoeficient = 0.0816326;
+	private final double angleCoeficient = 0.0116326;
 	private Panel game;
 	private Paddle otherPlayer;
 	private Paddle mainPlayer;
@@ -83,7 +83,7 @@ public class Ball extends Component implements PanelElement {
 			this.spawn();
 		}
 
-		return 1;
+		return 0;
 	}
 	
 	private int checkPaddleCollision() {
@@ -91,7 +91,7 @@ public class Ball extends Component implements PanelElement {
 				|| this.x >= this.mainPlayer.getX() - 5 && this.x <= this.mainPlayer.getX())
 				&& (this.y <= this.mainPlayer.getY() + this.mainPlayer.height
 				&& this.y >= this.mainPlayer.getY())) { // left paddle bounce
-			System.out.println(mainPlayer.getY() + " " + mainPlayer.height + " " + y);
+//			System.out.println(mainPlayer.getY() + " " + mainPlayer.height + " " + y);
 			
 			motionX = 1;
 			motionY = this.paddleAngle(mainPlayer);
@@ -104,7 +104,7 @@ public class Ball extends Component implements PanelElement {
 				&& this.y >= this.otherPlayer.getY())) { // right paddle bounce
 			
 			motionX = -1;
-			motionY = this.paddleAngle(mainPlayer) * -1;
+			motionY = this.paddleAngle(mainPlayer);
 //			motionY = -1;
 //			motionY = Integer.signum(this.random.nextInt());
 			return Definitions.BOUNCE;
@@ -113,10 +113,9 @@ public class Ball extends Component implements PanelElement {
 	}
 	
 	private double paddleAngle(Paddle playerPaddle) {
-		int value = playerPaddle.getY();
-		int bfPaddle = playerPaddle.getPriorYValue();
-		int maxPaddleValue = this.mainPlayer.getY() + this.mainPlayer.height;
-		int minPaddleValue = this.mainPlayer.getY();
+		int playerY = playerPaddle.getY();
+		int playerPriorY = playerPaddle.getPriorYValue();
+		int maxPaddleValue = playerY + this.mainPlayer.height;
 		
 		int halfPaddleHeight = maxPaddleValue / 2;
 		
@@ -126,8 +125,10 @@ public class Ball extends Component implements PanelElement {
 			return 0;
 		}
 		double angle = angleMultiplicator * this.angleCoeficient;
-		if (angle < 1) {
-			angle = 1;
+		if (playerPriorY > playerY) {
+			if (angle > 0) angle *= -1;
+		} else {
+			if (angle < 0) angle *= -1;
 		}
 		return angle;
 	}
