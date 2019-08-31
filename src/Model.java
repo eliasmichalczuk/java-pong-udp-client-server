@@ -15,6 +15,7 @@ public class Model implements KeyListener, ActionListener  {
 	private JFrame frame;
 	private Paddle otherPlayer;
 	private Ball ball;
+	private ClientServer cs;
 	
 	public Model(Paddle mainPlayer, Paddle otherPlayer, Panel panel, JFrame frame, Ball ball) {
 		this.mainPlayer = mainPlayer;
@@ -24,6 +25,9 @@ public class Model implements KeyListener, ActionListener  {
 		this.ball = ball;
 		this.createScoreElements();
 		this.attach();
+		
+		this.cs = new ClientServer(mainPlayer, otherPlayer, ball);
+		cs.start();
 	}
 	
 	@Override
