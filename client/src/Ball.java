@@ -1,9 +1,10 @@
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.io.Serializable;
 import java.util.Random;
 
-public class Ball extends Component implements PanelElement {
+public class Ball extends Component implements PanelElement, Serializable {
 
 	private static final long serialVersionUID = 792600125186361242L;
 	public int y, width = 25, height = 25, leftBound = 0, rightBound = 0;
@@ -84,6 +85,11 @@ public class Ball extends Component implements PanelElement {
 		}
 
 		return 0;
+	}
+	
+	public void assignPositionValuesFrom(int[] values) {
+		this.x = values[0];
+		this.y = values[1];
 	}
 	
 	private int checkPaddleCollision() {

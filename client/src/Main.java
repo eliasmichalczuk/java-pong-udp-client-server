@@ -25,6 +25,6 @@ public class Main {
 		Model model = new Model(mainPlayer, otherPlayer, panel, frame, ball);
 		
 		GameThread gt = new GameThread(panel);
-		gt.run();
+		gt.start();
 	}
 }

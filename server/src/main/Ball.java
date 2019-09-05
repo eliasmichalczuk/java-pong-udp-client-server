@@ -30,7 +30,7 @@ public class Ball implements PanelElement {
 	
 	public void spawn() {
 		this.amountOfHits = 0;
-		this.x = game.width / 2;
+		this.setX(game.width / 2);
 		this.y = game.height / 2;
 		this.motionX = Integer.signum(this.random.nextInt());
 		this.motionY = Integer.signum(this.random.nextInt());
@@ -42,13 +42,13 @@ public class Ball implements PanelElement {
 	
 	private void move() {
 		if (motionX == 0) {
-			x += speed + (amountOfHits/3);
+			setX(getX() + (speed + (amountOfHits/3)));
 		}
 		if (motionY == 0) {
 			y += speed + (amountOfHits/3);
 		}
 		if (motionX != 0 && motionY != 0) {
-			x += motionX * (speed + (amountOfHits/3));
+			setX(getX() + motionX * (speed + (amountOfHits/3)));
 			y += motionY * (speed + (amountOfHits/3));
 		}
 		this.changeDirectionOnCollision();
@@ -68,23 +68,23 @@ public class Ball implements PanelElement {
 			motionY *= -1;
 		}
 		
-		if (x < 0) {
+		if (getX() < 0) {
 			this.otherPlayer.score();
 			this.spawn();
 		}
 		
-		if (x > 750) {
+		if (getX() > 750) {
 			this.mainPlayer.score();
 			this.spawn();
 		}
-		System.out.println(y + " " + this.mainPlayer.getY() + " " + this.otherPlayer.getY());
+//		System.out.println(y + " " + this.mainPlayer.getY() + " " + this.otherPlayer.getY());
 
 		return 0;
 	}
 	
 	private int checkPaddleCollision() {
-		if ((this.x <= this.mainPlayer.getX() + this.mainPlayer.width
-				|| this.x >= this.mainPlayer.getX() - 5 && this.x <= this.mainPlayer.getX())
+		if ((this.getX() <= this.mainPlayer.getX() + this.mainPlayer.width
+				|| this.getX() >= this.mainPlayer.getX() - 5 && this.getX() <= this.mainPlayer.getX())
 				&& (this.y <= this.mainPlayer.getY() + this.mainPlayer.height
 				&& this.y >= this.mainPlayer.getY())) { // left paddle bounce
 //			System.out.println(mainPlayer.getY() + " " + mainPlayer.height + " " + y);
@@ -94,8 +94,8 @@ public class Ball implements PanelElement {
 //			motionY = Integer.signum(this.random.nextInt());
 			return Definitions.BOUNCE;
 		} 
-		if ((this.x <= this.otherPlayer.getX() - this.otherPlayer.width && this.x > this.otherPlayer.getX() - 5
-				|| this.x >= this.otherPlayer.getX())
+		if ((this.getX() <= this.otherPlayer.getX() - this.otherPlayer.width && this.getX() > this.otherPlayer.getX() - 5
+				|| this.getX() >= this.otherPlayer.getX())
 				&& (this.y <= this.otherPlayer.getY() + this.otherPlayer.height
 				&& this.y >= this.otherPlayer.getY())) { // right paddle bounce
 			
@@ -127,6 +127,14 @@ public class Ball implements PanelElement {
 			if (angle < 0) angle *= -1;
 		}
 		return angle;
+	}
+
+	public double getX() {
+		return x;
+	}
+
+	public void setX(double x) {
+		this.x = x;
 	}
 	
 	

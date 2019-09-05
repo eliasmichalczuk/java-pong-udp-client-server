@@ -3,8 +3,9 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.io.Serializable;
 
-public class Paddle extends Component implements PanelElement{
+public class Paddle extends Component implements PanelElement, Serializable {
 
 	private static final long serialVersionUID = 1429077799586317462L;
 	private double yVel;

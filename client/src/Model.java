@@ -3,6 +3,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.net.DatagramSocket;
+import java.net.SocketException;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -15,7 +17,8 @@ public class Model implements KeyListener, ActionListener  {
 	private JFrame frame;
 	private Paddle otherPlayer;
 	private Ball ball;
-	private ClientServer cs;
+	private final String hostName = "localhost";
+	private final int port = 4446;
 	
 	public Model(Paddle mainPlayer, Paddle otherPlayer, Panel panel, JFrame frame, Ball ball) {
 		this.mainPlayer = mainPlayer;
@@ -26,8 +29,13 @@ public class Model implements KeyListener, ActionListener  {
 		this.createScoreElements();
 		this.attach();
 		
-		this.cs = new ClientServer(mainPlayer, otherPlayer, ball);
-		cs.start();
+		
+		
+		ClientServer sendThread = new ClientServer(mainPlayer, otherPlayer, ball);
+		sendThread.start();
+		ClientReceiveThread receiveThread = new ClientReceiveThread(mainPlayer, otherPlayer, ball);
+		receiveThread.start();
+
 	}
 	
 	@Override
