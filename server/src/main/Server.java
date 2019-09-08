@@ -40,7 +40,7 @@ public class Server extends Thread {
 	
 	public Server(Ball ball, Paddle mainPlayer, Paddle otherPlayer, Panel panel) {
 		this.mainPlayer = mainPlayer;
-		this.otherPlayer = otherPlayer;
+		this.otherPlayer = otherPlayer; 
 		this.ball = ball;
 		this.panel = panel;
 	}
@@ -73,7 +73,9 @@ public class Server extends Thread {
 					BallLocalizationValues otherPlayerValues = new BallLocalizationValues((int) ball.getX(), ball.y,
 							this.mainPlayer.getScore(), this.otherPlayer.getScore(),
 							Definitions.OTHER_PLAYER, 0, this.getGameState(this.mainPlayer.getConnectionPort()));
-
+					
+					// System.out.println("other " + this.otherPlayer.getReceiveConnectionPort());
+					// System.out.println("main " + this.mainPlayer.getReceiveConnectionPort());
 //					int[] ballValues = new int[] {(int)ball.getX(), ball.y};
 //					byte[] responseValue = intsToBytes(ballValues);
 
@@ -91,7 +93,7 @@ public class Server extends Thread {
 						os.writeObject(otherPlayerValues);
 						valuesByteFormat = outputStream.toByteArray();
 						DatagramPacket otherPlayerPacket = new DatagramPacket(valuesByteFormat, valuesByteFormat.length,
-								address, this.mainPlayer.getReceiveConnectionPort());
+								address, this.otherPlayer.getReceiveConnectionPort());
 						socket.send(otherPlayerPacket);
 					} catch(SocketException e) {
 						e.printStackTrace();

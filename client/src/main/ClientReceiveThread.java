@@ -43,13 +43,13 @@ public class ClientReceiveThread extends Thread implements Serializable {
 
 		try (DatagramSocket socket = new DatagramSocket()) {
 			this.mainPlayer.setReceiveConnectionPort(socket.getLocalPort());
-			System.out.println(" " + mainPlayer.getReceiveConnectionPort());
+			// System.out.println(" " + mainPlayer.getReceiveConnectionPort());
 			while (true) {
 
 				responsePacket = new DatagramPacket(new byte[576], 576);
 				try {
 					socket.receive(responsePacket);
-					System.out.println("get port " + mainPlayer.getReceiveConnectionPort());
+					// System.out.println("get port " + mainPlayer.getReceiveConnectionPort());
 					ByteArrayInputStream in = new ByteArrayInputStream(responsePacket.getData());
 					ObjectInputStream is = new ObjectInputStream(in);
 					BallLocalizationValues gameValues = (BallLocalizationValues) is.readObject();

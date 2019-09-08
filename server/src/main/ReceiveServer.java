@@ -55,6 +55,7 @@ public class ReceiveServer  extends Thread {
 			e1.printStackTrace();
 		}
 		try(DatagramSocket socket = new DatagramSocket(port)) {
+			socket.setSoTimeout(3000);
 			while (connectionOpen) {
 				
 				try {
@@ -65,11 +66,13 @@ public class ReceiveServer  extends Thread {
 					ObjectInputStream is = new ObjectInputStream(in);
 					PlayerResponse playerResponseValues = (PlayerResponse) is.readObject();
 					int port = request.getPort();
+					
 					if (mainPlayer.getReceiveConnectionPort() == 0 || otherPlayer.getReceiveConnectionPort() == 0) {
 						if (mainPlayer.getReceiveConnectionPort() == 0) {
 							mainPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
 							mainPlayer.setConnectionPort(port);
-						} else {
+						}
+						if (port != mainPlayer.getConnectionPort()) {
 							otherPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
 							otherPlayer.setConnectionPort(port);
 						}
@@ -84,9 +87,11 @@ public class ReceiveServer  extends Thread {
 					} else if(this.matchPlayerPort(port) == Definitions.OTHER_PLAYER) {
 						otherPlayer.setY(playerResponseValues.playerY);
 					}
-				} catch (SocketException | RuntimeException e) {
+				} catch (RuntimeException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				} catch (SocketException e) {
+					this.mainPlayer.setConnectionPort(0);
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -99,7 +104,6 @@ public class ReceiveServer  extends Thread {
 	}
 	
 	private void assignPlayersReady(PlayerResponse playerResponseValues, int requestPort) {
-		System.out.println(playerResponseValues.ready);
 		if (!playerResponseValues.ready) return;
 		if (this.matchPlayerPort(requestPort) == Definitions.MAIN_PLAYER) {
 			mainPlayer.setReady();

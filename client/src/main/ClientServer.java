@@ -49,7 +49,6 @@ public class ClientServer extends Thread implements Serializable {
 				try {
 					os = new ObjectOutputStream(outputStream);
 					PlayerResponse request = new PlayerResponse(mainPlayer.getY(), mainPlayer.isReady(), mainPlayer.getReceiveConnectionPort());
-					System.out.println(request.ready);
 					os.writeObject(request);
 					byte[] obj = outputStream.toByteArray();
 
