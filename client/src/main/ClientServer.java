@@ -1,3 +1,4 @@
+package main;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -10,6 +11,8 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+import main.interfaces.PlayerResponse;
+
 public class ClientServer extends Thread implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -17,22 +20,24 @@ public class ClientServer extends Thread implements Serializable {
 	private Paddle mainPlayer;
 	private Paddle otherPlayer;
 	private Ball ball;
+	private Panel panel;
 
 	private final String hostName = "localhost";
 	private final int port = 4446;
 	private InetAddress address;
 	private DatagramPacket responsePacket;
 
-	public ClientServer(Paddle mainPlayer, Paddle otherPlayer, Ball ball) {
+	public ClientServer(Paddle mainPlayer, Paddle otherPlayer, Ball ball, Panel panel) {
 		this.mainPlayer = mainPlayer;
 		this.otherPlayer = otherPlayer;
 		this.ball = ball;
+		this.panel = panel;
 	}
 
 	@Override
 	public void run() {
 
-		try (DatagramSocket socke1 = new DatagramSocket()) {
+		try (DatagramSocket socket = new DatagramSocket()) {
 			try {
 				this.address = InetAddress.getByName(hostName);
 			} catch (UnknownHostException e) {
@@ -43,11 +48,13 @@ public class ClientServer extends Thread implements Serializable {
 				ObjectOutputStream os;
 				try {
 					os = new ObjectOutputStream(outputStream);
-					os.writeObject(mainPlayer.getY());
+					PlayerResponse request = new PlayerResponse(mainPlayer.getY(), mainPlayer.isReady(), mainPlayer.getReceiveConnectionPort());
+					System.out.println(request.ready);
+					os.writeObject(request);
 					byte[] obj = outputStream.toByteArray();
 
 					DatagramPacket playerRequestPacket = new DatagramPacket(obj, obj.length, address, port);
-					socke1.send(playerRequestPacket);
+					socket.send(playerRequestPacket);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

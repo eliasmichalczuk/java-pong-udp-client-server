@@ -1,8 +1,7 @@
 package main.interfaces;
 
-import java.io.Serializable;
 
-import main.Definitions;
+import java.io.Serializable;
 
 public class BallLocalizationValues implements Serializable {
 

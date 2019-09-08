@@ -6,7 +6,17 @@ import java.util.List;
 public class Panel {
 	
 	final int width = 750, height = 400;
+	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting
+	private int state = 0;
 	
+	public int getState() {
+		return state;
+	}
+
+	public void setState(int state) {
+		this.state = state;
+	}
+
 	private List<PanelElement> children = new ArrayList<PanelElement>();
 	private Paddle otherPlayer;
 	private Paddle mainPlayer;

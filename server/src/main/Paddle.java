@@ -6,7 +6,33 @@ public class Paddle implements PanelElement {
 	private boolean upAccel, downAccel;
 	private int player, x, y, priorYValue, score = 0;
 	private boolean connected = false;
-	private int connectionPort = 0;
+	private int sendConnectionPort = 0;
+	private int receiveConnectionPort = 0;
+	public int getReceiveConnectionPort() {
+		return receiveConnectionPort;
+	}
+
+	public void setReceiveConnectionPort(int receiveConnectionPort) {
+		this.receiveConnectionPort = receiveConnectionPort;
+	}
+	private int playerType = Definitions.DEFAULT_PLAYER;
+	private boolean ready = false;
+
+	public int getPlayerType() {
+		return playerType;
+	}
+
+	public void setPlayerType(int playerType) {
+		this.playerType = playerType;
+	}
+
+	public boolean isReady() {
+		return ready;
+	}
+
+	public void setReady() {
+		this.ready = true;
+	}
 
 	public boolean isConnected() {
 		return connected;
@@ -64,8 +90,10 @@ public class Paddle implements PanelElement {
 		priorYValue = y = 120;
 		yVel = 0;
 		if (player == Definitions.MAIN_PLAYER) {
+			this.playerType = Definitions.MAIN_PLAYER;
 			x = 10;
 		} else {
+			this.playerType = Definitions.OTHER_PLAYER;
 			x = 720;
 		}
 	}
@@ -116,11 +144,11 @@ public class Paddle implements PanelElement {
 	}
 
 	public int getConnectionPort() {
-		return connectionPort;
+		return sendConnectionPort;
 	}
 
 	public void setConnectionPort(int connectionPort) {
-		this.connectionPort = connectionPort;
+		this.sendConnectionPort = connectionPort;
 	}
 	
 }

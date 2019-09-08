@@ -1,3 +1,4 @@
+package main;
 import java.awt.Color;
 
 import javax.swing.JFrame;
@@ -14,7 +15,6 @@ public class Main {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 
-		
 		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
 		Paddle otherPlayer = new Paddle(Definitions.OTHER_PLAYER);
 		Panel panel = new Panel(mainPlayer, otherPlayer);

@@ -1,3 +1,4 @@
+package main;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -19,6 +20,20 @@ public class Panel extends JPanel{
 	final int width = 750, height = 400;
 	Rectangle bounds;
 	
+	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting
+	private int state = 0;
+	private int gameStartingValue = 0;
+	
+	private boolean enterPressed = false;
+	
+	public int getState() {
+		return state;
+	}
+
+	public void setState(int state) {
+		this.state = state;
+	}
+
 	private List<PanelElement> children = new ArrayList<PanelElement>();
 	private Paddle otherPlayer;
 	private Paddle mainPlayer;
@@ -48,12 +63,49 @@ public class Panel extends JPanel{
         super.paintComponent(g);
             g.setColor(Color.BLUE);
         for (PanelElement panelElement : this.children) {
-        	panelElement.paint(g);
+        	if (state == 1 ) {
+        		panelElement.paint(g);
+        	}
 		}
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", 1, 20));
-        g.drawString("You      Rival", 330, 15);
-        g.drawString("" + this.mainPlayer.getScore() + "               " + this.otherPlayer.getScore(), 330, 45);
+        
+        if (state == 0) {
+        	this.setGameInitialized(g);
+        } else if (state == 1) {
+            g.drawString("You      Rival", 330, 15);
+            g.drawString("" + this.mainPlayer.getScore() + "               " + this.otherPlayer.getScore(), 330, 45);
+        } else if (state == 4) {
+        	g.drawString("Waiting for player...", 330, 15);
+        } else if (state == 5) {
+        	g.drawString("Starting in " + gameStartingValue, 330, 15);
+        }
+
+        
+        
     }
+	
+	private void setGameInitialized(Graphics g) {
+		g.drawString("Press ENTER to be READY", 330, 15);
+	}
+
+	public void startGame() {
+		if (enterPressed) return;
+		this.enterPressed = true;
+		this.mainPlayer.setReady();
+	}
+
+	public void serverRespondedReady() {
+		this.state = 4;
+	}
+	
+	public void gameStarting(int gameStartingValue) {
+		this.state = 5;
+		this.gameStartingValue = gameStartingValue; 
+	}
+	
+	public void gameRunning(int gameStartingValue) {
+		this.state = 1; 
+	}
 
 }

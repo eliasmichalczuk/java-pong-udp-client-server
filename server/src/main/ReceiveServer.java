@@ -11,6 +11,9 @@ import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import main.interfaces.BallLocalizationValues;
+import main.interfaces.PlayerResponse;
+
 public class ReceiveServer  extends Thread {
 	
 	private final Logger audit = Logger.getLogger("requests");
@@ -21,11 +24,13 @@ public class ReceiveServer  extends Thread {
 	
 	private Paddle mainPlayer;
 	private Paddle otherPlayer;
+	private Panel panel;
 
 	
-	public ReceiveServer(Paddle mainPlayer, Paddle otherPlayer) {
+	public ReceiveServer(Paddle mainPlayer, Paddle otherPlayer, Panel panel) {
 		this.mainPlayer = mainPlayer;
 		this.otherPlayer = otherPlayer;
+		this.panel = panel;
 	}
 	
 	private int matchPlayerPort(int port) {
@@ -58,24 +63,26 @@ public class ReceiveServer  extends Thread {
 
 					ByteArrayInputStream in = new ByteArrayInputStream(request.getData());
 					ObjectInputStream is = new ObjectInputStream(in);
-					int playerY = (int) is.readObject();
-					
+					PlayerResponse playerResponseValues = (PlayerResponse) is.readObject();
 					int port = request.getPort();
-					System.out.println("player position " +  playerY);
-					
-					
-					if (mainPlayer.getConnectionPort() == 0 || otherPlayer.getConnectionPort() == 0 ) {
-						if (mainPlayer.getConnectionPort() == 0) {
-							mainPlayer.setConnectionPort(port);	
+					if (mainPlayer.getReceiveConnectionPort() == 0 || otherPlayer.getReceiveConnectionPort() == 0) {
+						if (mainPlayer.getReceiveConnectionPort() == 0) {
+							mainPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
+							mainPlayer.setConnectionPort(port);
 						} else {
+							otherPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
 							otherPlayer.setConnectionPort(port);
 						}
 					}
 					
+					if (!mainPlayer.isReady() || !otherPlayer.isReady()) {
+						this.assignPlayersReady(playerResponseValues, port);
+					}
+					
 					if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
-						mainPlayer.setY(playerY);
+						mainPlayer.setY(playerResponseValues.playerY);
 					} else if(this.matchPlayerPort(port) == Definitions.OTHER_PLAYER) {
-						otherPlayer.setY(playerY);
+						otherPlayer.setY(playerResponseValues.playerY);
 					}
 				} catch (SocketException | RuntimeException e) {
 					// TODO Auto-generated catch block
@@ -88,6 +95,16 @@ public class ReceiveServer  extends Thread {
 		}
 		catch (IOException e) {
 			errors.log(Level.SEVERE, e.getMessage(), e);
+		}
+	}
+	
+	private void assignPlayersReady(PlayerResponse playerResponseValues, int requestPort) {
+		System.out.println(playerResponseValues.ready);
+		if (!playerResponseValues.ready) return;
+		if (this.matchPlayerPort(requestPort) == Definitions.MAIN_PLAYER) {
+			mainPlayer.setReady();
+		} else if(this.matchPlayerPort(requestPort) == Definitions.OTHER_PLAYER) {
+			otherPlayer.setReady();
 		}
 	}
 	

@@ -1,3 +1,4 @@
+package main;
 import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,9 +32,9 @@ public class Model implements KeyListener, ActionListener  {
 		
 		
 		
-		ClientServer sendThread = new ClientServer(mainPlayer, otherPlayer, ball);
+		ClientServer sendThread = new ClientServer(mainPlayer, otherPlayer, ball, panel);
 		sendThread.start();
-		ClientReceiveThread receiveThread = new ClientReceiveThread(mainPlayer, otherPlayer, ball);
+		ClientReceiveThread receiveThread = new ClientReceiveThread(mainPlayer, otherPlayer, ball, panel);
 		receiveThread.start();
 
 	}
@@ -58,6 +59,9 @@ public class Model implements KeyListener, ActionListener  {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+			panel.startGame();
+		} 
 		
 		if (e.getKeyCode() == KeyEvent.VK_W) {
 			mainPlayer.setUpAccel(true);
