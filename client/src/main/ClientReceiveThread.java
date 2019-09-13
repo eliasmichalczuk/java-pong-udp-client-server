@@ -42,6 +42,8 @@ public class ClientReceiveThread extends Thread implements Serializable {
 		}
 
 		try (DatagramSocket socket = new DatagramSocket()) {
+			System.out.println(" socket" + socket.getLocalAddress());
+			System.out.println(" socket" + socket.getLocalPort());
 			this.mainPlayer.setReceiveConnectionPort(socket.getLocalPort());
 			// System.out.println(" " + mainPlayer.getReceiveConnectionPort());
 			while (true) {

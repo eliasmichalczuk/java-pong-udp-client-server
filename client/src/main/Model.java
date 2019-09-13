@@ -31,11 +31,6 @@ public class Model implements KeyListener, ActionListener  {
 		this.attach();
 		
 		
-		
-		ClientServer sendThread = new ClientServer(mainPlayer, otherPlayer, ball, panel);
-		sendThread.start();
-		ClientReceiveThread receiveThread = new ClientReceiveThread(mainPlayer, otherPlayer, ball, panel);
-		receiveThread.start();
 
 	}
 	

@@ -38,6 +38,8 @@ public class ClientServer extends Thread implements Serializable {
 	public void run() {
 
 		try (DatagramSocket socket = new DatagramSocket()) {
+			System.out.println(" socket" + socket.getLocalAddress());
+			System.out.println(" socket" + socket.getLocalPort());
 			try {
 				this.address = InetAddress.getByName(hostName);
 			} catch (UnknownHostException e) {
@@ -58,8 +60,10 @@ public class ClientServer extends Thread implements Serializable {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+				Thread.sleep(20);
+				Thread.yield();
 			}
-		} catch (SocketException e2) {
+		} catch (SocketException | InterruptedException e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}

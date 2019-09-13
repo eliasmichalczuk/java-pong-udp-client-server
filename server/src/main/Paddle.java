@@ -6,8 +6,8 @@ public class Paddle implements PanelElement {
 	private boolean upAccel, downAccel;
 	private int player, x, y, priorYValue, score = 0;
 	private boolean connected = false;
-	private int sendConnectionPort = 0;
-	private int receiveConnectionPort = 0;
+	private int sendConnectionPort = Definitions.DEFAULT_PORT_SEND;
+	private int receiveConnectionPort = Definitions.DEFAULT_PORT_RECEIVE;
 	public int getReceiveConnectionPort() {
 		return receiveConnectionPort;
 	}
@@ -38,8 +38,12 @@ public class Paddle implements PanelElement {
 		return connected;
 	}
 
-	public void setConnected(boolean connected) {
-		this.connected = connected;
+	public void setConnected() {
+		this.connected = true;
+	}
+	
+	public void setDisconnected() {
+		this.connected = false;
 	}
 
 	public double getyVel() {

@@ -6,4 +6,6 @@ public class Definitions {
 	public final static int MAIN_PLAYER_SCORE = 3;
 	public final static int OTHER_PLAYER_SCORE = 4;
 	public final static int BOUNCE = 5;
+	public final static int DEFAULT_PORT_RECEIVE = 8422;
+	public final static int DEFAULT_PORT_SEND = 8432;
 }

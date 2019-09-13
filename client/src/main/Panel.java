@@ -43,6 +43,7 @@ public class Panel extends JPanel{
 		this.otherPlayer = otherPlayer;
 		setBackground(Color.BLACK);
         bounds = new Rectangle(0, 0, width, height);
+        setOpaque(true);
 		setVisible(true);
 		setFocusable(true);
 	}

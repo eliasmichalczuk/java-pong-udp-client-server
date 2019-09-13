@@ -55,7 +55,7 @@ public class ReceiveServer  extends Thread {
 			e1.printStackTrace();
 		}
 		try(DatagramSocket socket = new DatagramSocket(port)) {
-			socket.setSoTimeout(3000);
+//			socket.setSoTimeout(3000);
 			while (connectionOpen) {
 				
 				try {
@@ -67,14 +67,17 @@ public class ReceiveServer  extends Thread {
 					PlayerResponse playerResponseValues = (PlayerResponse) is.readObject();
 					int port = request.getPort();
 					
-					if (mainPlayer.getReceiveConnectionPort() == 0 || otherPlayer.getReceiveConnectionPort() == 0) {
-						if (mainPlayer.getReceiveConnectionPort() == 0) {
+					
+					if (!mainPlayer.isConnected() || !otherPlayer.isConnected()) {
+						if (port == mainPlayer.getConnectionPort()) return;
+						if (!mainPlayer.isConnected()) {
 							mainPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
 							mainPlayer.setConnectionPort(port);
-						}
-						if (port != mainPlayer.getConnectionPort()) {
+							mainPlayer.setConnected();
+						} else if (!otherPlayer.isConnected()) {
 							otherPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
 							otherPlayer.setConnectionPort(port);
+							otherPlayer.setConnected();
 						}
 					}
 					
@@ -96,6 +99,7 @@ public class ReceiveServer  extends Thread {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				Thread.yield();
 			}
 		}
 		catch (IOException e) {

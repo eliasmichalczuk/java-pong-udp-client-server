@@ -83,8 +83,11 @@ public class Server extends Thread {
 					try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 							ObjectOutputStream os = new ObjectOutputStream(outputStream)) {
 						os.writeObject(mainPlayerValues);
-						byte[] valuesByteFormat = outputStream.toByteArray();
 						
+						
+						System.out.println("main " + mainPlayer.getConnectionPort() + " " + mainPlayer.getReceiveConnectionPort());
+						System.out.println("other " + otherPlayer.getConnectionPort() + " " + otherPlayer.getReceiveConnectionPort());
+						byte[] valuesByteFormat = outputStream.toByteArray();
 						DatagramPacket mainPlayerPacket = new DatagramPacket(valuesByteFormat, valuesByteFormat.length,
 								address, this.mainPlayer.getReceiveConnectionPort());
 						socket.send(mainPlayerPacket);
