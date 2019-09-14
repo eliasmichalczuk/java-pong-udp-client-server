@@ -85,6 +85,7 @@ public class Server extends Thread {
 					}
 					if(gameStartingValue == 0) {
 						this.startGame();
+						
 					}
 				}
 				Thread.sleep(20);
