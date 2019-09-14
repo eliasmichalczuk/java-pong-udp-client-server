@@ -75,9 +75,10 @@ public class ReceiveClient extends Thread implements Serializable {
 	
 	public void setLocalValues(BallLocalizationValues gameValues) {
 		this.ball.y = gameValues.y;
-		this.ball.x = (double) gameValues.x;
+		this.ball.x = gameValues.x;
 		this.mainPlayer.setScore(gameValues.mainPlayerScore);
 		this.otherPlayer.setScore(gameValues.otherPlayerScore);
+		this.otherPlayer.setY(gameValues.otherPlayerY);
 	}
 	
 	private void handleGameState(BallLocalizationValues gameValues) {

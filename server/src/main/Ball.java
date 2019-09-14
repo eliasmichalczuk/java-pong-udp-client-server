@@ -4,8 +4,8 @@ import java.util.Random;
 
 public class Ball implements PanelElement {
 
-	public int y, width = 25, height = 25, leftBound = 0, rightBound = 0;
-	private double x, motionX, motionY, speed = 5;
+	public int y, x, width = 25, height = 25, leftBound = 0, rightBound = 0;
+	private double motionX, motionY, speed = 5;
 	public Random random;
 	public int amountOfHits;
 	private final double angleCoeficient = 0.0116326;
@@ -135,12 +135,12 @@ public class Ball implements PanelElement {
 		return angle;
 	}
 
-	public double getX() {
+	public int getX() {
 		return x;
 	}
 
 	public void setX(double x) {
-		this.x = x;
+		this.x = (int) x;
 	}
 	
 	

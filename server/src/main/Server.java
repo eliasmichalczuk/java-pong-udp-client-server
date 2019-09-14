@@ -87,14 +87,18 @@ public class Server extends Thread {
 						this.startGame();
 					}
 				}
+				Thread.sleep(20);
 
 				try {
 					BallLocalizationValues mainPlayerValues = new BallLocalizationValues((int) ball.getX(), ball.y,
 							this.mainPlayer.getScore(), this.otherPlayer.getScore(), Definitions.MAIN_PLAYER, gameStartingValue,
-							this.getGameState(this.mainPlayer.getConnectionPort()));
-					BallLocalizationValues otherPlayerValues = new BallLocalizationValues((int) ball.getX(), ball.y,
+							this.getGameState(this.mainPlayer.getConnectionPort()), otherPlayer.getY());
+					
+					
+					BallLocalizationValues otherPlayerValues = new BallLocalizationValues(
+							this.invertHorizontalBallValue(ball.getX()), ball.y,
 							this.otherPlayer.getScore(), this.mainPlayer.getScore(), Definitions.OTHER_PLAYER, gameStartingValue,
-							this.getGameState(this.otherPlayer.getConnectionPort()));
+							this.getGameState(this.otherPlayer.getConnectionPort()), mainPlayer.getY());
 
 					// System.out.println("other " + this.otherPlayer.getReceiveConnectionPort());
 					// System.out.println("main " + this.mainPlayer.getReceiveConnectionPort());
@@ -114,8 +118,9 @@ public class Server extends Thread {
 								address, this.mainPlayer.getReceiveConnectionPort());
 						socket.send(mainPlayerPacket);
 
-						os.reset();
-						os.writeObject(otherPlayerValues);
+						outputStream.reset();
+						ObjectOutputStream ous = new ObjectOutputStream(outputStream);
+						ous.writeObject(otherPlayerValues);
 						valuesByteFormat = outputStream.toByteArray();
 						DatagramPacket otherPlayerPacket = new DatagramPacket(valuesByteFormat, valuesByteFormat.length,
 								address, this.otherPlayer.getReceiveConnectionPort());
@@ -129,7 +134,7 @@ public class Server extends Thread {
 					e.printStackTrace();
 				}
 			}
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 			errors.log(Level.SEVERE, e.getMessage(), e);
 		}
 	}
@@ -181,6 +186,11 @@ public class Server extends Thread {
 //		Thread server = new Server();
 //		server.start();
 		loadElements();
+	}
+	
+	public int invertHorizontalBallValue(int x) {
+		int width = this.panel.width;
+		return width - x;
 	}
 
 	public static void loadElements() {

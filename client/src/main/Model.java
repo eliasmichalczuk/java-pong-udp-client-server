@@ -37,7 +37,6 @@ public class Model implements KeyListener, ActionListener  {
 	@Override
 	public void keyTyped(KeyEvent e) {
 		mainPlayer.move();
-		otherPlayer.move();
 //		panel.repaint();
 	}
 
@@ -60,12 +59,10 @@ public class Model implements KeyListener, ActionListener  {
 		
 		if (e.getKeyCode() == KeyEvent.VK_W) {
 			mainPlayer.setUpAccel(true);
-			otherPlayer.setUpAccel(true);
 		} 
 		
 		if (e.getKeyCode() == KeyEvent.VK_S) {
 			mainPlayer.setDownAccel(true);
-			otherPlayer.setDownAccel(true);
 		}
 	}
 	
@@ -76,12 +73,10 @@ public class Model implements KeyListener, ActionListener  {
 	public void keyReleased(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_W) {
 			mainPlayer.setUpAccel(false);
-			otherPlayer.setUpAccel(false);
 		} 
 		
 		if (e.getKeyCode() == KeyEvent.VK_S) {
 			mainPlayer.setDownAccel(false);
-			otherPlayer.setDownAccel(false);
 		}
 	}
 

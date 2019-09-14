@@ -8,8 +8,7 @@ import java.util.Random;
 public class Ball extends Component implements PanelElement, Serializable {
 
 	private static final long serialVersionUID = 792600125186361242L;
-	public int y, width = 25, height = 25, leftBound = 0, rightBound = 0;
-	public double x;
+	public int y, x, width = 25, height = 25, leftBound = 0, rightBound = 0;
 	private double motionX, motionY, speed = 5;
 	public Random random;
 	public int amountOfHits;
@@ -42,7 +41,7 @@ public class Ball extends Component implements PanelElement, Serializable {
 	}
 	
 	public void paint(Graphics g) {
-		this.move();
+//		this.move();
 		g.setColor(Color.WHITE);
 		g.fillOval((int)x, y, width, height);
 		setVisible(true);

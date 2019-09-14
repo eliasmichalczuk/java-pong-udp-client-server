@@ -67,23 +67,8 @@ public class ReceiveServer  extends Thread {
 					PlayerResponse playerResponseValues = (PlayerResponse) is.readObject();
 					int port = request.getPort();
 					
-					
-					if (!mainPlayer.isConnected() || !otherPlayer.isConnected()) {
-						if (port == mainPlayer.getConnectionPort()) return;
-						if (!mainPlayer.isConnected()) {
-							mainPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
-							mainPlayer.setConnectionPort(port);
-							mainPlayer.setConnected();
-						} else if (!otherPlayer.isConnected()) {
-							otherPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
-							otherPlayer.setConnectionPort(port);
-							otherPlayer.setConnected();
-						}
-					}
-					
-					if (!mainPlayer.isReady() || !otherPlayer.isReady()) {
-						this.assignPlayersReady(playerResponseValues, port);
-					}
+					handlePlayersNotConnected(playerResponseValues, port);
+					assignPlayersReady(playerResponseValues, port);
 					
 					if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
 						mainPlayer.setY(playerResponseValues.playerY);
@@ -107,13 +92,31 @@ public class ReceiveServer  extends Thread {
 		}
 	}
 	
-	private void assignPlayersReady(PlayerResponse playerResponseValues, int requestPort) {
-		if (!playerResponseValues.ready) return;
-		if (this.matchPlayerPort(requestPort) == Definitions.MAIN_PLAYER) {
-			mainPlayer.setReady();
-		} else if(this.matchPlayerPort(requestPort) == Definitions.OTHER_PLAYER) {
-			otherPlayer.setReady();
+	private void handlePlayersNotConnected(PlayerResponse playerResponseValues, int port) {
+		if (!mainPlayer.isConnected() || !otherPlayer.isConnected()) {
+			if (port == mainPlayer.getConnectionPort()) return;
+			if (!mainPlayer.isConnected()) {
+				mainPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
+				mainPlayer.setConnectionPort(port);
+				mainPlayer.setConnected();
+			} else if (!otherPlayer.isConnected()) {
+				otherPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
+				otherPlayer.setConnectionPort(port);
+				otherPlayer.setConnected();
+			}
 		}
+	}
+	
+	private void assignPlayersReady(PlayerResponse playerResponseValues, int requestPort) {
+		if (!mainPlayer.isReady() || !otherPlayer.isReady()) {
+			if (!playerResponseValues.ready) return;
+			if (this.matchPlayerPort(requestPort) == Definitions.MAIN_PLAYER) {
+				mainPlayer.setReady();
+			} else if(this.matchPlayerPort(requestPort) == Definitions.OTHER_PLAYER) {
+				otherPlayer.setReady();
+			}
+		}
+	
 	}
 	
 }
