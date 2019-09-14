@@ -9,7 +9,8 @@ public class Ball extends Component implements PanelElement, Serializable {
 
 	private static final long serialVersionUID = 792600125186361242L;
 	public int y, width = 25, height = 25, leftBound = 0, rightBound = 0;
-	private double x, motionX, motionY, speed = 5;
+	public double x;
+	private double motionX, motionY, speed = 5;
 	public Random random;
 	public int amountOfHits;
 	private final double angleCoeficient = 0.0116326;

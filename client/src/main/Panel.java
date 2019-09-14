@@ -105,7 +105,7 @@ public class Panel extends JPanel{
 		this.gameStartingValue = gameStartingValue; 
 	}
 	
-	public void gameRunning(int gameStartingValue) {
+	public void gameRunning() {
 		this.state = 1; 
 	}
 

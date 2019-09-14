@@ -1,4 +1,5 @@
 package main;
+import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -11,9 +12,11 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+import javax.swing.JFrame;
+
 import main.interfaces.PlayerResponse;
 
-public class ClientServer extends Thread implements Serializable {
+public class Client extends Thread implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -27,7 +30,7 @@ public class ClientServer extends Thread implements Serializable {
 	private InetAddress address;
 	private DatagramPacket responsePacket;
 
-	public ClientServer(Paddle mainPlayer, Paddle otherPlayer, Ball ball, Panel panel) {
+	public Client(Paddle mainPlayer, Paddle otherPlayer, Ball ball, Panel panel) {
 		this.mainPlayer = mainPlayer;
 		this.otherPlayer = otherPlayer;
 		this.ball = ball;
@@ -67,5 +70,38 @@ public class ClientServer extends Thread implements Serializable {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
+	}
+	
+	public static void main(String[] args) {
+		
+		JFrame frame = new JFrame();
+		frame.setSize(750, 400);
+		frame.setTitle("Java UDP Multiclient Pong Game");
+		frame.setBackground(Color.BLACK);
+		frame.setVisible(true);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+
+		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
+		Paddle otherPlayer = new Paddle(Definitions.OTHER_PLAYER);
+		Panel panel = new Panel(mainPlayer, otherPlayer);
+		Ball ball = new Ball(panel, mainPlayer, otherPlayer);
+		
+		
+		Model model = new Model(mainPlayer, otherPlayer, panel, frame, ball);
+		
+		frame.getContentPane().add(panel);
+		
+		Panel.centerWindow(frame);
+		panel.setVisible(true);
+		panel.setFocusable(true);
+		panel.addKeyListener(model);
+		GameThread gt = new GameThread(panel);
+		gt.start();
+		Client sendThread = new Client(mainPlayer, otherPlayer, ball, panel);
+		sendThread.start();
+		ReceiveClient receiveThread = new ReceiveClient(mainPlayer, otherPlayer, ball, panel);
+		receiveThread.start();
+
 	}
 }

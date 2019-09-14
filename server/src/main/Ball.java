@@ -23,6 +23,12 @@ public class Ball implements PanelElement {
 		spawn();
 	}
 	
+	public void reset() {
+		this.mainPlayer.setScore(0);
+		this.otherPlayer.setScore(0);
+		this.spawn();
+	}
+	
 	private void assignBounds() {
 		this.leftBound = this.mainPlayer.width + this.mainPlayer.getX();
 		this.rightBound = this.otherPlayer.getX();

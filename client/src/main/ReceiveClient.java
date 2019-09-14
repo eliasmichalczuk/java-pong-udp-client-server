@@ -12,7 +12,7 @@ import java.net.UnknownHostException;
 
 import main.interfaces.BallLocalizationValues;
 
-public class ClientReceiveThread extends Thread implements Serializable {
+public class ReceiveClient extends Thread implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private Paddle mainPlayer;
@@ -25,7 +25,7 @@ public class ClientReceiveThread extends Thread implements Serializable {
 	private InetAddress address;
 	private DatagramPacket responsePacket;
 
-	public ClientReceiveThread(Paddle mainPlayer, Paddle otherPlayer, Ball ball, Panel panel) {
+	public ReceiveClient(Paddle mainPlayer, Paddle otherPlayer, Ball ball, Panel panel) {
 		this.mainPlayer = mainPlayer;
 		this.otherPlayer = otherPlayer;
 		this.ball = ball;
@@ -58,6 +58,7 @@ public class ClientReceiveThread extends Thread implements Serializable {
 					// System.out.println("handling " + gameValues.gameState + "handling " + gameValues.gameStartingValue + "handling " + gameValues.playerType);
 
 					this.handleGameState(gameValues);
+					this.setLocalValues(gameValues);
 
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -72,11 +73,20 @@ public class ClientReceiveThread extends Thread implements Serializable {
 
 	}
 	
+	public void setLocalValues(BallLocalizationValues gameValues) {
+		this.ball.y = gameValues.y;
+		this.ball.x = (double) gameValues.x;
+		this.mainPlayer.setScore(gameValues.mainPlayerScore);
+		this.otherPlayer.setScore(gameValues.otherPlayerScore);
+	}
+	
 	private void handleGameState(BallLocalizationValues gameValues) {
 		if (gameValues.gameState == 4) {
 			this.panel.serverRespondedReady();
 		} else if (gameValues.gameState == 5) {
-			this.panel.gameRunning(gameValues.gameStartingValue);
+			this.panel.gameStarting(gameValues.gameStartingValue);
+		} else if (gameValues.gameState == 1) {
+			this.panel.gameRunning();
 		}
 	}
 }
