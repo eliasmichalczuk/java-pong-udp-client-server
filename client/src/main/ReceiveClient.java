@@ -88,6 +88,9 @@ public class ReceiveClient extends Thread implements Serializable {
 			this.panel.gameStarting(gameValues.gameStartingValue);
 		} else if (gameValues.gameState == 1) {
 			this.panel.gameRunning();
+		} else if (gameValues.gameState == 2) {
+			panel.setState(2);
+			this.mainPlayer.setGamePaused(true);
 		}
 	}
 }

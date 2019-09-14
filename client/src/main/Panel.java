@@ -70,16 +70,25 @@ public class Panel extends JPanel{
 		}
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", 1, 20));
-        
         if (state == 0) {
         	this.setGameInitialized(g);
         } else if (state == 1) {
-            g.drawString("You      Rival", 330, 15);
-            g.drawString("" + this.mainPlayer.getScore() + "               " + this.otherPlayer.getScore(), 330, 45);
+            g.drawString("You      Rival", 290, 15);
+            g.drawString("" + this.mainPlayer.getScore() + "               " + this.otherPlayer.getScore(), 290, 45);
         } else if (state == 4) {
-        	g.drawString("Waiting for player...", 330, 15);
+        	g.drawString("Waiting for player...", 290, 15);
         } else if (state == 5) {
-        	g.drawString("Starting in " + gameStartingValue, 330, 15);
+        	g.drawString("Starting in " + gameStartingValue, 265, 15);
+        } else if (state == 2) {
+        	g.drawString("You      Rival", 290, 15);
+            g.drawString("" + this.mainPlayer.getScore() + "               " + this.otherPlayer.getScore(), 290, 45);
+        	
+            if (mainPlayer.doWantsToPause()) {
+            	g.drawString("PAUSED - P to play", 265, 200);
+            } else {
+            	g.drawString("Your rival needs a break from losing", 180, 200);
+            	g.drawString("Game is paused", 285, 220);
+            }
         }
 
         
@@ -95,6 +104,14 @@ public class Panel extends JPanel{
 		this.enterPressed = true;
 		this.mainPlayer.setReady();
 	}
+	
+	public void pauseGame() {
+		if (mainPlayer.doWantsToPause()) {
+			this.mainPlayer.setWantsToPause(false);
+		} else {
+			this.mainPlayer.setWantsToPause(true);	
+		}
+	}
 
 	public void serverRespondedReady() {
 		this.state = 4;
@@ -106,6 +123,7 @@ public class Panel extends JPanel{
 	}
 	
 	public void gameRunning() {
+		mainPlayer.setGamePaused(false);
 		this.state = 1; 
 	}
 

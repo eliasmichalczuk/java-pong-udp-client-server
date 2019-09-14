@@ -47,6 +47,11 @@ public class Ball implements PanelElement {
 	}
 	
 	private void move() {
+		
+		if (game.getState() == 2) {
+			return;
+		}
+		
 		if (motionX == 0) {
 			setX(getX() + (speed + (amountOfHits/3)));
 		}

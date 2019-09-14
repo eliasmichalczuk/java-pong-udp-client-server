@@ -13,6 +13,8 @@ public class Paddle extends Component implements PanelElement, Serializable {
 	private boolean upAccel, downAccel;
 	private int player, x, y, priorYValue, score = 0;
 	private boolean connected = false;
+	private boolean wantsToPause = false;
+	private boolean gamePaused = false;
 	private int sendConnectionPort = Definitions.DEFAULT_PORT_SEND;
 	private int receiveConnectionPort = Definitions.DEFAULT_PORT_RECEIVE;
 	public int getReceiveConnectionPort() {
@@ -113,6 +115,10 @@ public class Paddle extends Component implements PanelElement, Serializable {
 
 	public void move() {
 		
+		if (gamePaused) {
+			return;
+		}
+		
 		if (upAccel) {
 			yVel = -35;
 		} else if (downAccel) {
@@ -163,6 +169,22 @@ public class Paddle extends Component implements PanelElement, Serializable {
 	
 	public void reset() {
 		this.score = 0;
+	}
+
+	public boolean doWantsToPause() {
+		return wantsToPause;
+	}
+
+	public void setWantsToPause(boolean playerWantsToPause) {
+		this.wantsToPause = playerWantsToPause;
+	}
+
+	public boolean isGamePaused() {
+		return gamePaused;
+	}
+
+	public void setGamePaused(boolean gamePaused) {
+		this.gamePaused = gamePaused;
 	}
 	
 }

@@ -70,6 +70,13 @@ public class ReceiveServer  extends Thread {
 					handlePlayersNotConnected(playerResponseValues, port);
 					assignPlayersReady(playerResponseValues, port);
 					
+					if(panel.getState() == 2 && !playerResponseValues.wantsToPause) {
+						this.panel.unPauseGame(port);
+					}
+					if(playerResponseValues.wantsToPause) {
+						this.panel.pauseGame(port);
+					}
+					
 					if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
 						mainPlayer.setY(playerResponseValues.playerY);
 					} else if(this.matchPlayerPort(port) == Definitions.OTHER_PLAYER) {

@@ -53,8 +53,15 @@ public class Model implements KeyListener, ActionListener  {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		
+		// enter - START
 		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 			panel.startGame();
+		}
+		
+		// p - PAUSE
+		if (e.getKeyCode() == KeyEvent.VK_P) {
+			panel.pauseGame();
 		} 
 		
 		if (e.getKeyCode() == KeyEvent.VK_W) {

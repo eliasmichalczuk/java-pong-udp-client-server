@@ -8,9 +8,22 @@ public class Panel {
 	final int width = 750, height = 400;
 	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting
 	private int state = 0;
+	private int playerPausedConnectionPort = 0;
 	
 	public int getState() {
 		return state;
+	}
+	
+	public void pauseGame(int playerConnectionPort) {
+		this.setState(2);
+		playerPausedConnectionPort = playerConnectionPort; 
+	}
+	
+	public void unPauseGame(int playerConnectionPort) {
+		if (playerConnectionPort == playerPausedConnectionPort) {
+			setState(1);
+			playerPausedConnectionPort = 0;
+		}
 	}
 
 	public void setState(int state) {

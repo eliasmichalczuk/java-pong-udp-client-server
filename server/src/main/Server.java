@@ -67,27 +67,7 @@ public class Server extends Thread {
 		try (DatagramSocket socket = new DatagramSocket(port)) {
 			while (connectionOpen) {
 
-				if (mainPlayer.isReady() && otherPlayer.isReady() && this.panel.getState() == 0
-						|| this.panel.getState() == 5) {
-					this.calendar = Calendar.getInstance();
-					int secs = calendar.get(Calendar.SECOND);
-					if (gameStartingValue == 0 && !countStarted) {
-						countStarted = true;
-						this.gameStartingValue = 3;
-						this.panel.setState(5);
-						calendarSeconds = secs;
-					} else if (gameStartingValue > 0 || gameStartingValue <= 3) {
-						System.out.println(gameStartingValue);
-						if (calendarSeconds != secs) {
-							calendarSeconds = secs;
-							gameStartingValue--;
-						}
-					}
-					if(gameStartingValue == 0) {
-						this.startGame();
-						
-					}
-				}
+				gameStartCountdown();
 				Thread.sleep(20);
 
 				try {
@@ -101,19 +81,11 @@ public class Server extends Thread {
 							this.otherPlayer.getScore(), this.mainPlayer.getScore(), Definitions.OTHER_PLAYER, gameStartingValue,
 							this.getGameState(this.otherPlayer.getConnectionPort()), mainPlayer.getY());
 
-					// System.out.println("other " + this.otherPlayer.getReceiveConnectionPort());
-					// System.out.println("main " + this.mainPlayer.getReceiveConnectionPort());
-//					int[] ballValues = new int[] {(int)ball.getX(), ball.y};
-//					byte[] responseValue = intsToBytes(ballValues);
 
 					try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 							ObjectOutputStream os = new ObjectOutputStream(outputStream)) {
 						os.writeObject(mainPlayerValues);
 
-//						System.out.println(
-//								"main " + mainPlayer.getConnectionPort() + " " + mainPlayer.getReceiveConnectionPort());
-//						System.out.println("other " + otherPlayer.getConnectionPort() + " "
-//								+ otherPlayer.getReceiveConnectionPort());
 						byte[] valuesByteFormat = outputStream.toByteArray();
 						DatagramPacket mainPlayerPacket = new DatagramPacket(valuesByteFormat, valuesByteFormat.length,
 								address, this.mainPlayer.getReceiveConnectionPort());
@@ -140,9 +112,34 @@ public class Server extends Thread {
 		}
 	}
 
+	private void gameStartCountdown() {
+		if (mainPlayer.isReady() && otherPlayer.isReady() && this.panel.getState() == 0
+				|| this.panel.getState() == 5) {
+			this.calendar = Calendar.getInstance();
+			int seconds = calendar.get(Calendar.SECOND);
+			if (gameStartingValue == 0 && !countStarted) {
+				countStarted = true;
+				this.gameStartingValue = 3;
+				this.panel.setState(5);
+				calendarSeconds = seconds;
+			} else if (gameStartingValue > 0 || gameStartingValue <= 3) {
+				if (calendarSeconds != seconds) {
+					calendarSeconds = seconds;
+					gameStartingValue--;
+				}
+			}
+			if(gameStartingValue == 0) {
+				this.startGame();
+				
+			}
+		}
+	}
+
 	private int getGameState(int port) {
 		if (panel.getState() == 1) {
 			return 1;
+		} else if (panel.getState() == 2) {
+			return 2;
 		}
 		if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
 			if (mainPlayer.isReady() && !otherPlayer.isReady()) {
