@@ -64,6 +64,11 @@ public class Model implements KeyListener, ActionListener  {
 			panel.pauseGame();
 		} 
 		
+		// L - QUIT
+		if (e.getKeyCode() == KeyEvent.VK_L) {
+			panel.leaveGame();
+		}
+		
 		if (e.getKeyCode() == KeyEvent.VK_W) {
 			mainPlayer.setUpAccel(true);
 		} 

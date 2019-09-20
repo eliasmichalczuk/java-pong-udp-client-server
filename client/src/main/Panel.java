@@ -8,12 +8,14 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 public class Panel extends JPanel{
 	
@@ -37,8 +39,9 @@ public class Panel extends JPanel{
 	private List<PanelElement> children = new ArrayList<PanelElement>();
 	private Paddle otherPlayer;
 	private Paddle mainPlayer;
+	private FrameCallback frameCallback;
 	
-	public Panel(Paddle mainPlayer, Paddle otherPlayer) {
+	public Panel(Paddle mainPlayer, Paddle otherPlayer, FrameCallback frameCallback) {
 		this.mainPlayer = mainPlayer;
 		this.otherPlayer = otherPlayer;
 		setBackground(Color.BLACK);
@@ -46,6 +49,7 @@ public class Panel extends JPanel{
         setOpaque(true);
 		setVisible(true);
 		setFocusable(true);
+		this.frameCallback = frameCallback;
 	}
 	
 	public static void centerWindow(Window frame) {
@@ -83,9 +87,12 @@ public class Panel extends JPanel{
         	g.drawString("You      Rival", 290, 15);
             g.drawString("" + this.mainPlayer.getScore() + "               " + this.otherPlayer.getScore(), 290, 45);
         	
-            if (mainPlayer.doWantsToPause()) {
+            if (mainPlayer.doesWantToPause() && !mainPlayer.doesWantToQuit()) {
             	g.drawString("PAUSED - P to play", 265, 200);
-            } else {
+            } else if (mainPlayer.doesWantToPause() && mainPlayer.doesWantToQuit()){
+            	g.drawString("Do you really want to quit the game?", 180, 200);
+            	g.drawString("L to leave, P to return", 285, 220);
+            } else if (!mainPlayer.doesWantToPause()) {
             	g.drawString("Your rival needs a break from losing", 180, 200);
             	g.drawString("Game is paused", 285, 220);
             }
@@ -106,10 +113,19 @@ public class Panel extends JPanel{
 	}
 	
 	public void pauseGame() {
-		if (mainPlayer.doWantsToPause()) {
+		if (mainPlayer.doesWantToPause()) {
 			this.mainPlayer.setWantsToPause(false);
 		} else {
 			this.mainPlayer.setWantsToPause(true);	
+		}
+	}
+	
+	public void leaveGame() {
+		if(mainPlayer.doesWantToQuit()) {
+			mainPlayer.setLeavingGame(true);
+		} else if (!mainPlayer.doesWantToQuit()){
+			this.mainPlayer.setWantsToPause(true);	
+			this.mainPlayer.setWantToQuit(true);	
 		}
 	}
 
@@ -126,5 +142,9 @@ public class Panel extends JPanel{
 		mainPlayer.setGamePaused(false);
 		this.state = 1; 
 	}
+
+	public void closeGameWindow() {
+		this.frameCallback.closeFrame();
+ 	}
 
 }

@@ -38,7 +38,7 @@ public class Paddle implements PanelElement {
 		return connected;
 	}
 
-	public void setConnected() {
+	public void setConnected(boolean connected) {
 		this.connected = true;
 	}
 	
@@ -114,6 +114,12 @@ public class Paddle implements PanelElement {
 		
 		if (y < 0) y = 0;
 		if (y > 280) y = 280;
+	}
+	
+	public void leftGame() {
+		setReceiveConnectionPort(Definitions.DEFAULT_PORT_RECEIVE);
+		setConnectionPort(Definitions.DEFAULT_PORT_RECEIVE);
+		setConnected(false);
 	}
 	
 	public int getPriorYValue() {

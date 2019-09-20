@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.io.Serializable;
+import java.util.Calendar;
 
 public class Paddle extends Component implements PanelElement, Serializable {
 
@@ -14,7 +15,10 @@ public class Paddle extends Component implements PanelElement, Serializable {
 	private int player, x, y, priorYValue, score = 0;
 	private boolean connected = false;
 	private boolean wantsToPause = false;
+	private boolean wantToQuit = false;
+	private boolean leavingGame = false;
 	private boolean gamePaused = false;
+	private Calendar timeLastReceivedValue;
 	private int sendConnectionPort = Definitions.DEFAULT_PORT_SEND;
 	private int receiveConnectionPort = Definitions.DEFAULT_PORT_RECEIVE;
 	public int getReceiveConnectionPort() {
@@ -171,7 +175,7 @@ public class Paddle extends Component implements PanelElement, Serializable {
 		this.score = 0;
 	}
 
-	public boolean doWantsToPause() {
+	public boolean doesWantToPause() {
 		return wantsToPause;
 	}
 
@@ -185,6 +189,30 @@ public class Paddle extends Component implements PanelElement, Serializable {
 
 	public void setGamePaused(boolean gamePaused) {
 		this.gamePaused = gamePaused;
+	}
+
+	public boolean doesWantToQuit() {
+		return wantToQuit;
+	}
+
+	public void setWantToQuit(boolean wantToQuit) {
+		this.wantToQuit = wantToQuit;
+	}
+
+	public boolean isLeavingGame() {
+		return leavingGame;
+	}
+
+	public void setLeavingGame(boolean leavingGame) {
+		this.leavingGame = leavingGame;
+	}
+
+	public Calendar getTimeLastReceivedValue() {
+		return timeLastReceivedValue;
+	}
+
+	public void setTimeLastReceivedValue(Calendar lastReceivedValue) {
+		this.timeLastReceivedValue = lastReceivedValue;
 	}
 	
 }

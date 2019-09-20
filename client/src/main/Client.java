@@ -11,6 +11,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.Calendar;
 
 import javax.swing.JFrame;
 
@@ -48,14 +49,22 @@ public class Client extends Thread implements Serializable {
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			}
+			mainPlayer.setTimeLastReceivedValue(Calendar.getInstance());
 			while (true) {
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 				ObjectOutputStream os;
 				try {
+					if (Calendar.getInstance().get(Calendar.SECOND) -
+							mainPlayer.getTimeLastReceivedValue().get(Calendar.SECOND) > 3
+							&& mainPlayer.isLeavingGame()) {
+						panel.closeGameWindow();
+					}
 					os = new ObjectOutputStream(outputStream);
 					PlayerResponse request = new PlayerResponse(
 							mainPlayer.getY(), mainPlayer.isReady(),
-							mainPlayer.getReceiveConnectionPort(), mainPlayer.doWantsToPause());
+							mainPlayer.getReceiveConnectionPort(),
+							mainPlayer.doesWantToPause(),
+							mainPlayer.isLeavingGame());
 					os.writeObject(request);
 					byte[] obj = outputStream.toByteArray();
 
@@ -86,14 +95,13 @@ public class Client extends Thread implements Serializable {
 
 		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
 		Paddle otherPlayer = new Paddle(Definitions.OTHER_PLAYER);
-		Panel panel = new Panel(mainPlayer, otherPlayer);
+		Panel panel = new Panel(mainPlayer, otherPlayer, new FrameCallback(frame));
 		Ball ball = new Ball(panel, mainPlayer, otherPlayer);
 		
 		
 		Model model = new Model(mainPlayer, otherPlayer, panel, frame, ball);
 		
 		frame.getContentPane().add(panel);
-		
 		Panel.centerWindow(frame);
 		panel.setVisible(true);
 		panel.setFocusable(true);

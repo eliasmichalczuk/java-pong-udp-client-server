@@ -69,6 +69,7 @@ public class ReceiveServer  extends Thread {
 					
 					handlePlayersNotConnected(playerResponseValues, port);
 					assignPlayersReady(playerResponseValues, port);
+					handlePlayerLeaving(playerResponseValues, port);
 					
 					if(panel.getState() == 2 && !playerResponseValues.wantsToPause) {
 						this.panel.unPauseGame(port);
@@ -99,27 +100,37 @@ public class ReceiveServer  extends Thread {
 		}
 	}
 	
+	private void handlePlayerLeaving(PlayerResponse playerResponseValues, int port) {
+		if (playerResponseValues.leavingGame) {
+			if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
+				mainPlayer.leftGame();
+			} else if(this.matchPlayerPort(port) == Definitions.OTHER_PLAYER) {
+				otherPlayer.leftGame();
+			}
+		}
+	}
+	
 	private void handlePlayersNotConnected(PlayerResponse playerResponseValues, int port) {
 		if (!mainPlayer.isConnected() || !otherPlayer.isConnected()) {
 			if (port == mainPlayer.getConnectionPort()) return;
 			if (!mainPlayer.isConnected()) {
 				mainPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
 				mainPlayer.setConnectionPort(port);
-				mainPlayer.setConnected();
+				mainPlayer.setConnected(true);
 			} else if (!otherPlayer.isConnected()) {
 				otherPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
 				otherPlayer.setConnectionPort(port);
-				otherPlayer.setConnected();
+				otherPlayer.setConnected(true);
 			}
 		}
 	}
 	
-	private void assignPlayersReady(PlayerResponse playerResponseValues, int requestPort) {
+	private void assignPlayersReady(PlayerResponse playerResponseValues, int port) {
 		if (!mainPlayer.isReady() || !otherPlayer.isReady()) {
 			if (!playerResponseValues.ready) return;
-			if (this.matchPlayerPort(requestPort) == Definitions.MAIN_PLAYER) {
+			if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
 				mainPlayer.setReady();
-			} else if(this.matchPlayerPort(requestPort) == Definitions.OTHER_PLAYER) {
+			} else if(this.matchPlayerPort(port) == Definitions.OTHER_PLAYER) {
 				otherPlayer.setReady();
 			}
 		}

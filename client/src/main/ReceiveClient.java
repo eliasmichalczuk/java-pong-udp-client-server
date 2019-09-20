@@ -9,6 +9,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Calendar;
 
 import main.interfaces.BallLocalizationValues;
 
@@ -59,6 +60,7 @@ public class ReceiveClient extends Thread implements Serializable {
 
 					this.handleGameState(gameValues);
 					this.setLocalValues(gameValues);
+					mainPlayer.setTimeLastReceivedValue(Calendar.getInstance());
 
 				} catch (IOException e) {
 					e.printStackTrace();
