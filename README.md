@@ -1,12 +1,13 @@
 # Java Pong UDP Client Server
 
 Two player client server pong game in development. 
-Currently, two player in the same machine can connect to the server listeting on port 4446 e and return on port 4445.
+Currently, two clients (SWING GUI's) for one player, on a machine, can connect to the server listening on port 4446 e and it returns on port 4445.
 Player have ports generated automatically.
 
 
 ## Getting Started
 
+Run two Client classes, one for each SWING GUI and run the Server class. Press enter on each window, wait for the countdown end and play.
 The game is currently not ready to actually have fun with it.
 
 ### Prerequisites
