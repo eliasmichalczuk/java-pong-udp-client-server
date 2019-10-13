@@ -14,6 +14,7 @@ import java.nio.IntBuffer;
 import java.util.Calendar;
 
 import javax.swing.JFrame;
+import javax.swing.JTextField;
 
 import main.interfaces.PlayerResponse;
 
@@ -92,13 +93,11 @@ public class Client extends Thread implements Serializable {
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-
+		
 		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
 		Paddle otherPlayer = new Paddle(Definitions.OTHER_PLAYER);
 		Panel panel = new Panel(mainPlayer, otherPlayer, new FrameCallback(frame));
 		Ball ball = new Ball(panel, mainPlayer, otherPlayer);
-		
-		
 		Model model = new Model(mainPlayer, otherPlayer, panel, frame, ball);
 		
 		frame.getContentPane().add(panel);
@@ -106,6 +105,8 @@ public class Client extends Thread implements Serializable {
 		panel.setVisible(true);
 		panel.setFocusable(true);
 		panel.addKeyListener(model);
+		
+
 		GameThread gt = new GameThread(panel);
 		gt.start();
 		Client sendThread = new Client(mainPlayer, otherPlayer, ball, panel);

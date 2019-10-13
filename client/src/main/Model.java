@@ -30,8 +30,6 @@ public class Model implements KeyListener, ActionListener  {
 		this.createScoreElements();
 		this.attach();
 		
-		
-
 	}
 	
 	@Override
@@ -44,9 +42,10 @@ public class Model implements KeyListener, ActionListener  {
 		this.panel.addChildrenElement(mainPlayer);
 		this.panel.addChildrenElement(otherPlayer);
 		this.panel.addChildrenElement(ball);
-		this.frame.add(mainPlayer);
-		this.frame.add(otherPlayer);
-		this.frame.add(ball);
+//		this.panel.add(mainPlayer);
+//		this.panel.add(otherPlayer);
+//		this.panel.add(ball);
+//		this.panel.add(textfield);
 		frame.addKeyListener(this);
 	}
 	

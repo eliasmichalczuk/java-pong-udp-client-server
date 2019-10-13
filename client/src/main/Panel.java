@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 public class Panel extends JPanel{
@@ -22,7 +23,7 @@ public class Panel extends JPanel{
 	final int width = 750, height = 400;
 	Rectangle bounds;
 	
-	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting
+	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting, 6 setting number of rounds and max score values
 	private int state = 0;
 	private int gameStartingValue = 0;
 	
@@ -40,16 +41,17 @@ public class Panel extends JPanel{
 	private Paddle otherPlayer;
 	private Paddle mainPlayer;
 	private FrameCallback frameCallback;
+	private JTextField textfield;
 	
 	public Panel(Paddle mainPlayer, Paddle otherPlayer, FrameCallback frameCallback) {
 		this.mainPlayer = mainPlayer;
 		this.otherPlayer = otherPlayer;
 		setBackground(Color.BLACK);
         bounds = new Rectangle(0, 0, width, height);
-        setOpaque(true);
+    	this.frameCallback = frameCallback;
+		setOpaque(true);
 		setVisible(true);
 		setFocusable(true);
-		this.frameCallback = frameCallback;
 	}
 	
 	public static void centerWindow(Window frame) {
@@ -72,6 +74,7 @@ public class Panel extends JPanel{
         		panelElement.paint(g);
         	}
 		}
+//        this.printChildren(g);
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", 1, 20));
         if (state == 0) {
