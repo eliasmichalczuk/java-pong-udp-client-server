@@ -50,9 +50,9 @@ public class Server extends Thread {
 	}
 	
 	private void startGame() {
-		gameStartingValue = 0;
 		this.panel.setState(1);
 		this.ball.reset();
+		this.countStarted = false;
 	}
 
 	@Override
@@ -61,7 +61,6 @@ public class Server extends Thread {
 		try {
 			address = InetAddress.getByName(hostName);
 		} catch (UnknownHostException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		try (DatagramSocket socket = new DatagramSocket(port)) {
@@ -71,15 +70,21 @@ public class Server extends Thread {
 				Thread.sleep(20);
 
 				try {
-					BallLocalizationValues mainPlayerValues = new BallLocalizationValues((int) ball.getX(), ball.y,
-							this.mainPlayer.getScore(), this.otherPlayer.getScore(), Definitions.MAIN_PLAYER, gameStartingValue,
-							this.getGameState(this.mainPlayer.getConnectionPort()), otherPlayer.getY());
-					
+					BallLocalizationValues mainPlayerValues = new BallLocalizationValues(
+							(int) ball.getX(), ball.y,
+							this.mainPlayer.getScore(), this.otherPlayer.getScore(),
+							Definitions.MAIN_PLAYER, gameStartingValue,
+							this.getGameState(this.mainPlayer.getConnectionPort()),
+							otherPlayer.getY(), panel.getMaxRounds(),
+							panel.getMaxScore(), mainPlayer.getRoundsWon(), otherPlayer.getRoundsWon());
 					
 					BallLocalizationValues otherPlayerValues = new BallLocalizationValues(
 							this.invertHorizontalBallValue(ball.getX()), ball.y,
-							this.otherPlayer.getScore(), this.mainPlayer.getScore(), Definitions.OTHER_PLAYER, gameStartingValue,
-							this.getGameState(this.otherPlayer.getConnectionPort()), mainPlayer.getY());
+							this.otherPlayer.getScore(), this.mainPlayer.getScore(),
+							Definitions.OTHER_PLAYER, gameStartingValue,
+							this.getGameState(this.otherPlayer.getConnectionPort()),
+							mainPlayer.getY(), panel.getMaxRounds(),
+							panel.getMaxScore(), otherPlayer.getRoundsWon(), mainPlayer.getRoundsWon());
 
 
 					try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -103,7 +108,6 @@ public class Server extends Thread {
 					}
 
 				} catch (RuntimeException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -113,6 +117,9 @@ public class Server extends Thread {
 	}
 
 	private void gameStartCountdown() {
+		if (panel.getState() == 1) {
+			return;
+		}
 		if (mainPlayer.isReady() && otherPlayer.isReady() && this.panel.getState() == 0
 				|| this.panel.getState() == 5) {
 			this.calendar = Calendar.getInstance();
@@ -140,6 +147,8 @@ public class Server extends Thread {
 			return 1;
 		} else if (panel.getState() == 2) {
 			return 2;
+		} else if (panel.getState() == 7) {
+			return 7;
 		}
 		if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
 			if (mainPlayer.isReady() && !otherPlayer.isReady()) {

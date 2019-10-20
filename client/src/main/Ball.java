@@ -41,7 +41,6 @@ public class Ball extends Component implements PanelElement, Serializable {
 	}
 	
 	public void paint(Graphics g) {
-//		this.move();
 		g.setColor(Color.WHITE);
 		g.fillOval((int)x, y, width, height);
 		setVisible(true);
@@ -98,11 +97,9 @@ public class Ball extends Component implements PanelElement, Serializable {
 				|| this.x >= this.mainPlayer.getX() - 5 && this.x <= this.mainPlayer.getX())
 				&& (this.y <= this.mainPlayer.getY() + this.mainPlayer.height
 				&& this.y >= this.mainPlayer.getY())) { // left paddle bounce
-//			System.out.println(mainPlayer.getY() + " " + mainPlayer.height + " " + y);
 			
 			motionX = 1;
 			motionY = this.paddleAngle(mainPlayer);
-//			motionY = Integer.signum(this.random.nextInt());
 			return Definitions.BOUNCE;
 		} 
 		if ((this.x <= this.otherPlayer.getX() - this.otherPlayer.width && this.x > this.otherPlayer.getX() - 5

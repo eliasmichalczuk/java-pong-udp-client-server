@@ -43,12 +43,13 @@ public class Ball implements PanelElement {
 	}
 	
 	public void paint() {
+
 		this.move();
 	}
 	
 	private void move() {
 		
-		if (game.getState() == 2) {
+		if (game.getState() == 2 || game.getState() == 7 || game.getState() == 3) {
 			return;
 		}
 		
@@ -80,13 +81,11 @@ public class Ball implements PanelElement {
 		}
 		
 		if (getX() < 0) {
-			this.otherPlayer.score();
-			this.spawn();
+			game.playerScored(otherPlayer, this);
 		}
 		
 		if (getX() > 750) {
-			this.mainPlayer.score();
-			this.spawn();
+			game.playerScored(mainPlayer, this);
 		}
 //		System.out.println(y + " " + this.mainPlayer.getY() + " " + this.otherPlayer.getY());
 

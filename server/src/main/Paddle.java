@@ -4,7 +4,7 @@ public class Paddle implements PanelElement {
 	private static final long serialVersionUID = 1429077799586317462L;
 	private double yVel;
 	private boolean upAccel, downAccel;
-	private int player, x, y, priorYValue, score = 0;
+	private int player, x, y, priorYValue, score = 0, roundsWon = 0;
 	private boolean connected = false;
 	private int sendConnectionPort = Definitions.DEFAULT_PORT_SEND;
 	private int receiveConnectionPort = Definitions.DEFAULT_PORT_RECEIVE;
@@ -89,10 +89,6 @@ public class Paddle implements PanelElement {
 	final int width = 10, height = 100;
 	
 	public Paddle(int player) {
-		upAccel = false;
-		downAccel = false;
-		priorYValue = y = 120;
-		yVel = 0;
 		if (player == Definitions.MAIN_PLAYER) {
 			this.playerType = Definitions.MAIN_PLAYER;
 			x = 10;
@@ -100,6 +96,7 @@ public class Paddle implements PanelElement {
 			this.playerType = Definitions.OTHER_PLAYER;
 			x = 720;
 		}
+		this.reset();
 	}
 
 	public void move() {
@@ -150,7 +147,12 @@ public class Paddle implements PanelElement {
 	}
 	
 	public void reset() {
+		this.roundsWon = 0;
 		this.score = 0;
+		upAccel = false;
+		downAccel = false;
+		priorYValue = y = 120;
+		yVel = 0;
 	}
 
 	public int getConnectionPort() {
@@ -159,6 +161,14 @@ public class Paddle implements PanelElement {
 
 	public void setConnectionPort(int connectionPort) {
 		this.sendConnectionPort = connectionPort;
+	}
+
+	public int getRoundsWon() {
+		return roundsWon;
+	}
+	
+	public void increseRoundsWon() {
+		++roundsWon;
 	}
 	
 }

@@ -46,13 +46,11 @@ public class ReceiveClient extends Thread implements Serializable {
 			System.out.println(" socket" + socket.getLocalAddress());
 			System.out.println(" socket" + socket.getLocalPort());
 			this.mainPlayer.setReceiveConnectionPort(socket.getLocalPort());
-			// System.out.println(" " + mainPlayer.getReceiveConnectionPort());
 			while (true) {
 
 				responsePacket = new DatagramPacket(new byte[576], 576);
 				try {
 					socket.receive(responsePacket);
-					// System.out.println("get port " + mainPlayer.getReceiveConnectionPort());
 					ByteArrayInputStream in = new ByteArrayInputStream(responsePacket.getData());
 					ObjectInputStream is = new ObjectInputStream(in);
 					BallLocalizationValues gameValues = (BallLocalizationValues) is.readObject();
@@ -75,12 +73,17 @@ public class ReceiveClient extends Thread implements Serializable {
 
 	}
 	
-	public void setLocalValues(BallLocalizationValues gameValues) {
-		this.ball.y = gameValues.y;
-		this.ball.x = gameValues.x;
-		this.mainPlayer.setScore(gameValues.mainPlayerScore);
-		this.otherPlayer.setScore(gameValues.otherPlayerScore);
-		this.otherPlayer.setY(gameValues.otherPlayerY);
+	public void setLocalValues(BallLocalizationValues values) {
+		this.ball.y = values.y;
+		this.ball.x = values.x;
+		this.mainPlayer.setScore(values.mainPlayerScore);
+		this.otherPlayer.setScore(values.otherPlayerScore);
+		this.otherPlayer.setY(values.otherPlayerY);
+		this.mainPlayer.setRoundsWon(values.mainPlayerRoundsWon);
+		this.otherPlayer.setRoundsWon(values.otherPlayerRoundsWon);
+		panel.currentRound = values.currentRound;
+		panel.maxRounds = values.currentRound;
+		panel.maxScore = values.maxScore;
 	}
 	
 	private void handleGameState(BallLocalizationValues gameValues) {
@@ -89,10 +92,13 @@ public class ReceiveClient extends Thread implements Serializable {
 		} else if (gameValues.gameState == 5) {
 			this.panel.gameStarting(gameValues.gameStartingValue);
 		} else if (gameValues.gameState == 1) {
+			mainPlayer.wantsRestartAfterGameEndedByValue = false;
 			this.panel.gameRunning();
 		} else if (gameValues.gameState == 2) {
 			panel.setState(2);
 			this.mainPlayer.setGamePaused(true);
+		} else if (gameValues.gameState == 7) {
+			panel.setState(7);
 		}
 	}
 }

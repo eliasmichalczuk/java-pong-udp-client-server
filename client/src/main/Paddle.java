@@ -12,15 +12,13 @@ public class Paddle extends Component implements PanelElement, Serializable {
 	private static final long serialVersionUID = 1429077799586317462L;
 	private double yVel;
 	private boolean upAccel, downAccel;
-	private int player, x, y, priorYValue, score = 0;
-	private boolean connected = false;
-	private boolean wantsToPause = false;
-	private boolean wantToQuit = false;
-	private boolean leavingGame = false;
-	private boolean gamePaused = false;
+	private int player, x, y, priorYValue, score, roundsWon;
+	private boolean connected, wantsToPause, wantToQuit, leavingGame, gamePaused;
+	public boolean wantsRestartAfterGameEndedByValue;
 	private Calendar timeLastReceivedValue;
 	private int sendConnectionPort = Definitions.DEFAULT_PORT_SEND;
 	private int receiveConnectionPort = Definitions.DEFAULT_PORT_RECEIVE;
+	
 	public int getReceiveConnectionPort() {
 		return receiveConnectionPort;
 	}
@@ -213,6 +211,14 @@ public class Paddle extends Component implements PanelElement, Serializable {
 
 	public void setTimeLastReceivedValue(Calendar lastReceivedValue) {
 		this.timeLastReceivedValue = lastReceivedValue;
+	}
+
+	public int getRoundsWon() {
+		return roundsWon;
+	}
+
+	public void setRoundsWon(int roundsWon) {
+		this.roundsWon = roundsWon;
 	}
 	
 }

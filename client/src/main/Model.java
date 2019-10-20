@@ -75,6 +75,10 @@ public class Model implements KeyListener, ActionListener  {
 		if (e.getKeyCode() == KeyEvent.VK_S) {
 			mainPlayer.setDownAccel(true);
 		}
+		
+		if (e.getKeyCode() == KeyEvent.VK_X && this.panel.getState() == 7) {
+			panel.restartGameAfterEndByScore();
+		}
 	}
 	
 	private void createScoreElements() {

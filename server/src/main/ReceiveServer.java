@@ -51,11 +51,9 @@ public class ReceiveServer  extends Thread {
 		try {
 			address = InetAddress.getByName(hostName);
 		} catch (UnknownHostException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		try(DatagramSocket socket = new DatagramSocket(port)) {
-//			socket.setSoTimeout(3000);
 			while (connectionOpen) {
 				
 				try {
@@ -67,9 +65,18 @@ public class ReceiveServer  extends Thread {
 					PlayerResponse playerResponseValues = (PlayerResponse) is.readObject();
 					int port = request.getPort();
 					
+					if(panel.getMaxRounds() == 0) {
+						panel.setMaxRounds(playerResponseValues.maxRounds);
+						panel.setMaxScore(playerResponseValues.maxScore);
+					}
+					
 					handlePlayersNotConnected(playerResponseValues, port);
 					assignPlayersReady(playerResponseValues, port);
 					handlePlayerLeaving(playerResponseValues, port);
+					
+					if (playerResponseValues.wantsRestartAfterGameEndedByValue && panel.getState() == 7) {
+						this.panel.resetGame();
+					}
 					
 					if(panel.getState() == 2 && !playerResponseValues.wantsToPause) {
 						this.panel.unPauseGame(port);
@@ -84,12 +91,10 @@ public class ReceiveServer  extends Thread {
 						otherPlayer.setY(playerResponseValues.playerY);
 					}
 				} catch (RuntimeException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (SocketException e) {
 					this.mainPlayer.setConnectionPort(0);
 				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				Thread.yield();

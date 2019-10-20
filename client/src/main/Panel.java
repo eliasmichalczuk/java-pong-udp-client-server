@@ -23,12 +23,13 @@ public class Panel extends JPanel{
 	final int width = 750, height = 400;
 	Rectangle bounds;
 	
-	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting, 6 setting number of rounds and max score values
+	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting, 7 ended by max score
 	private int state = 0;
 	private int gameStartingValue = 0;
 	
 	private boolean enterPressed = false;
-	
+	public int maxRounds, maxScore, currentRound;
+
 	public int getState() {
 		return state;
 	}
@@ -80,15 +81,17 @@ public class Panel extends JPanel{
         if (state == 0) {
         	this.setGameInitialized(g);
         } else if (state == 1) {
-            g.drawString("You      Rival", 290, 15);
-            g.drawString("" + this.mainPlayer.getScore() + "               " + this.otherPlayer.getScore(), 290, 45);
+            g.drawString("you      rival     max rounds: " + maxRounds, 290, 15);
+            g.drawString("scores " + this.mainPlayer.getScore() + "               " + this.otherPlayer.getScore(), 215, 45);
+            g.drawString("rounds " + this.mainPlayer.getRoundsWon()+ "               " + this.otherPlayer.getRoundsWon(), 210, 75);
         } else if (state == 4) {
         	g.drawString("Waiting for player...", 290, 15);
         } else if (state == 5) {
         	g.drawString("Starting in " + gameStartingValue, 265, 15);
         } else if (state == 2) {
-        	g.drawString("You      Rival", 290, 15);
-            g.drawString("" + this.mainPlayer.getScore() + "               " + this.otherPlayer.getScore(), 290, 45);
+            g.drawString("you      rival     max rounds: " + maxRounds, 290, 15);
+            g.drawString("scores " + this.mainPlayer.getScore() + "               " + this.otherPlayer.getScore(), 215, 45);
+            g.drawString("rounds " + this.mainPlayer.getRoundsWon()+ "               " + this.otherPlayer.getRoundsWon(), 210, 75);
         	
             if (mainPlayer.doesWantToPause() && !mainPlayer.doesWantToQuit()) {
             	g.drawString("PAUSED - P to play", 265, 200);
@@ -99,6 +102,16 @@ public class Panel extends JPanel{
             	g.drawString("Your rival needs a break from losing", 180, 200);
             	g.drawString("Game is paused", 285, 220);
             }
+        }
+        else if (state == 7) {
+    		g.drawString("you      rival     max rounds: " + maxRounds, 290, 15);
+            g.drawString("rounds " + this.mainPlayer.getRoundsWon()+ "               " + this.otherPlayer.getRoundsWon(), 210, 75);
+        	if (this.mainPlayer.getRoundsWon() == maxRounds) {
+                g.drawString("YOU WIN", 350, 180);
+        	} else {
+        		g.drawString("YOU LOSE", 350, 180);
+        	}
+        	g.drawString("X to restart", 350, 220);
         }
 
         
@@ -149,5 +162,11 @@ public class Panel extends JPanel{
 	public void closeGameWindow() {
 		this.frameCallback.closeFrame();
  	}
+
+	public void restartGameAfterEndByScore() {
+		mainPlayer.setWantsToPause(false);
+		mainPlayer.setReady();
+		this.mainPlayer.wantsRestartAfterGameEndedByValue = true;
+	}
 
 }

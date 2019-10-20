@@ -32,11 +32,16 @@ public class Client extends Thread implements Serializable {
 	private InetAddress address;
 	private DatagramPacket responsePacket;
 
-	public Client(Paddle mainPlayer, Paddle otherPlayer, Ball ball, Panel panel) {
+	public  int maxRounds;
+	public int maxScore;
+
+	public Client(Paddle mainPlayer, Paddle otherPlayer, Ball ball, Panel panel, int maxRounds, int maxScore) {
 		this.mainPlayer = mainPlayer;
 		this.otherPlayer = otherPlayer;
 		this.ball = ball;
 		this.panel = panel;
+		this.maxRounds = maxRounds;
+		this.maxScore = maxScore;
 	}
 
 	@Override
@@ -55,17 +60,27 @@ public class Client extends Thread implements Serializable {
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 				ObjectOutputStream os;
 				try {
+					
 					if (Calendar.getInstance().get(Calendar.SECOND) -
 							mainPlayer.getTimeLastReceivedValue().get(Calendar.SECOND) > 3
 							&& mainPlayer.isLeavingGame()) {
 						panel.closeGameWindow();
 					}
+					
+					while (mainPlayer.getReceiveConnectionPort() == 0) {
+						Client.sleep(20);
+					}
+					
+					if (!mainPlayer.isReady()) {
+						Client.sleep(20);
+					}
+			
 					os = new ObjectOutputStream(outputStream);
 					PlayerResponse request = new PlayerResponse(
 							mainPlayer.getY(), mainPlayer.isReady(),
 							mainPlayer.getReceiveConnectionPort(),
 							mainPlayer.doesWantToPause(),
-							mainPlayer.isLeavingGame());
+							mainPlayer.isLeavingGame(), maxRounds, maxScore, mainPlayer.wantsRestartAfterGameEndedByValue);
 					os.writeObject(request);
 					byte[] obj = outputStream.toByteArray();
 
@@ -85,6 +100,17 @@ public class Client extends Thread implements Serializable {
 	}
 	
 	public static void main(String[] args) {
+		
+		
+		// Clien run with "SERVER_ADDRESS ROUNDS POINTS"
+		int maxRounds, maxScore;
+		try {
+			maxRounds = Integer.parseInt(args[0]);
+			maxScore = Integer.parseInt(args[1]);
+		} catch (RuntimeException ex) {
+			System.err.println("Uso: SERVER_ADDRESS ROUNDS POINTS");
+			return;
+		}
 		
 		JFrame frame = new JFrame();
 		frame.setSize(750, 400);
@@ -109,7 +135,7 @@ public class Client extends Thread implements Serializable {
 
 		GameThread gt = new GameThread(panel);
 		gt.start();
-		Client sendThread = new Client(mainPlayer, otherPlayer, ball, panel);
+		Client sendThread = new Client(mainPlayer, otherPlayer, ball, panel, maxRounds, maxScore);
 		sendThread.start();
 		ReceiveClient receiveThread = new ReceiveClient(mainPlayer, otherPlayer, ball, panel);
 		receiveThread.start();

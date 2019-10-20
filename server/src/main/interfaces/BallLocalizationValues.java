@@ -9,9 +9,14 @@ public class BallLocalizationValues implements Serializable {
 	private static final long serialVersionUID = 26944692441869882L;
 	public final int x, y, mainPlayerScore, otherPlayerScore;
 	public final int playerType, gameStartingValue, gameState, otherPlayerY;
+	public int maxScore;
+	public int currentRound;
+	private final int mainPlayerRoundsWon;
+	private final int otherPlayerRoundsWon;
 	
 	public BallLocalizationValues(int x, int y, int mainPlayerScore,
-			int otherPlayerScore, int playerType, int gameStartingValue, int gameState, int otherPlayerY) {
+			int otherPlayerScore, int playerType, int gameStartingValue,
+			int gameState, int otherPlayerY, int currentRound, int maxScore, int mainPlayerRoundsWon, int otherPlayerRoundsWon) {
 		this.y = y;
 		this.x = x;
 		this.mainPlayerScore = mainPlayerScore;
@@ -20,5 +25,9 @@ public class BallLocalizationValues implements Serializable {
 		this.gameStartingValue = gameStartingValue;
 		this.gameState = gameState;
 		this.otherPlayerY = otherPlayerY;
+		this.currentRound = currentRound;
+		this.maxScore = maxScore;
+		this.mainPlayerRoundsWon = mainPlayerRoundsWon;
+		this.otherPlayerRoundsWon = otherPlayerRoundsWon;
 	}
 }

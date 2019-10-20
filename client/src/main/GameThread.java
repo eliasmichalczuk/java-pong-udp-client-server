@@ -3,6 +3,7 @@ package main;
 public class GameThread extends Thread {
 	
 	private Panel panel;
+	private int sleepTime = 20;
 
 	public GameThread(Panel panel) {
 		this.panel = panel;
@@ -10,15 +11,22 @@ public class GameThread extends Thread {
 
 	@Override
 	public void run() {
-
 		while (true) {
+	        if (panel.getState() == 0 || panel.getState() == 4 || panel.getState() == 7 || panel.getState() == 3) {
+	        	sleepTime = 40;
+	        } else if(panel.getState() == 1) {
+	        	sleepTime = 1;
+	        } else if(panel.getState() == 2 || panel.getState() == 5) {
+	        	sleepTime = 10;
+	        }
 			try {
-				Thread.sleep(10);
+				Thread.sleep(sleepTime);
 				this.panel.repaint();
-				
-			} catch(InterruptedException e) {
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
 		}
 	}
 
