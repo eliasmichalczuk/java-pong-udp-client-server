@@ -1,20 +1,16 @@
 package main;
+
+import java.net.Socket;
+
 public class Paddle implements PanelElement {
 
 	private static final long serialVersionUID = 1429077799586317462L;
 	private double yVel;
 	private boolean upAccel, downAccel;
 	private int player, x, y, priorYValue, score = 0, roundsWon = 0;
-	private boolean connected = false;
-	private int sendConnectionPort = Definitions.DEFAULT_PORT_SEND;
-	private int receiveConnectionPort = Definitions.DEFAULT_PORT_RECEIVE;
-	public int getReceiveConnectionPort() {
-		return receiveConnectionPort;
-	}
-
-	public void setReceiveConnectionPort(int receiveConnectionPort) {
-		this.receiveConnectionPort = receiveConnectionPort;
-	}
+	public Socket connection;
+//	private int sendConnectionPort = Definitions.DEFAULT_PORT_SEND;
+//	private int receiveConnectionPort = Definitions.DEFAULT_PORT_RECEIVE;
 	private int playerType = Definitions.DEFAULT_PLAYER;
 	private boolean ready = false;
 
@@ -35,16 +31,9 @@ public class Paddle implements PanelElement {
 	}
 
 	public boolean isConnected() {
-		return connected;
+		return this.connection != null;
 	}
 
-	public void setConnected(boolean connected) {
-		this.connected = true;
-	}
-	
-	public void setDisconnected() {
-		this.connected = false;
-	}
 
 	public double getyVel() {
 		return yVel;
@@ -114,9 +103,9 @@ public class Paddle implements PanelElement {
 	}
 	
 	public void leftGame() {
-		setReceiveConnectionPort(Definitions.DEFAULT_PORT_RECEIVE);
-		setConnectionPort(Definitions.DEFAULT_PORT_RECEIVE);
-		setConnected(false);
+//		setReceiveConnectionPort(Definitions.DEFAULT_PORT_RECEIVE);
+//		setConnectionPort(Definitions.DEFAULT_PORT_RECEIVE);
+		this.connection = null;
 	}
 	
 	public int getPriorYValue() {
@@ -153,14 +142,6 @@ public class Paddle implements PanelElement {
 		downAccel = false;
 		priorYValue = y = 120;
 		yVel = 0;
-	}
-
-	public int getConnectionPort() {
-		return sendConnectionPort;
-	}
-
-	public void setConnectionPort(int connectionPort) {
-		this.sendConnectionPort = connectionPort;
 	}
 
 	public int getRoundsWon() {

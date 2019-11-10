@@ -1,6 +1,7 @@
 package main;
 
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
@@ -22,28 +23,17 @@ public class ReceiveServer  extends Thread {
 	private InetAddress address;
 	private final String hostName = "localhost";
 	
-	private Paddle mainPlayer;
-	private Paddle otherPlayer;
+	private Paddle player;
 	private Panel panel;
+	private PlayerActionsHandler handler;
 
 	
-	public ReceiveServer(Paddle mainPlayer, Paddle otherPlayer, Panel panel) {
-		this.mainPlayer = mainPlayer;
-		this.otherPlayer = otherPlayer;
+	public ReceiveServer(Paddle player, Panel panel, PlayerActionsHandler handler) {
+		this.player = player;
 		this.panel = panel;
+		this.handler = handler;
 	}
-	
-	private int matchPlayerPort(int port) {
-		if (this.mainPlayer.getConnectionPort() == port) {
-			return Definitions.MAIN_PLAYER;
-		}
-		
-		if (this.otherPlayer.getConnectionPort() == port) {
-			return Definitions.OTHER_PLAYER;
-		}
-		
-		return 0; 
-	}
+
 
 	@Override
 	public void run() {
@@ -53,47 +43,42 @@ public class ReceiveServer  extends Thread {
 		} catch (UnknownHostException e1) {
 			e1.printStackTrace();
 		}
-		try(DatagramSocket socket = new DatagramSocket(port)) {
+		try(DataInputStream in = new DataInputStream(this.player.connection.getInputStream())) {
 			while (connectionOpen) {
 				
 				try {
-					DatagramPacket request = new DatagramPacket(new byte[1024], 1024);
-					socket.receive(request);
+//					DatagramPacket request = new DatagramPacket(new byte[1024], 1024);
+//					socket.receive(request);
 
-					ByteArrayInputStream in = new ByteArrayInputStream(request.getData());
+//					ByteArrayInputStream in = new ByteArrayInputStream(request.getData());
+//					ObjectInputStream is = new ObjectInputStream(in);
+					
 					ObjectInputStream is = new ObjectInputStream(in);
 					PlayerResponse playerResponseValues = (PlayerResponse) is.readObject();
-					int port = request.getPort();
 					
 					if(panel.getMaxRounds() == 0) {
 						panel.setMaxRounds(playerResponseValues.maxRounds);
 						panel.setMaxScore(playerResponseValues.maxScore);
 					}
 					
-					handlePlayersNotConnected(playerResponseValues, port);
-					assignPlayersReady(playerResponseValues, port);
-					handlePlayerLeaving(playerResponseValues, port);
+					this.handler.assignPlayersReady(playerResponseValues, player);
+					this.handler.handlePlayerLeaving(playerResponseValues, player);
 					
 					if (playerResponseValues.wantsRestartAfterGameEndedByValue && panel.getState() == 7) {
 						this.panel.resetGame();
 					}
 					
 					if(panel.getState() == 2 && !playerResponseValues.wantsToPause) {
-						this.panel.unPauseGame(port);
+						this.panel.unPauseGame(player.connection.toString());
 					}
 					if(playerResponseValues.wantsToPause) {
-						this.panel.pauseGame(port);
+						this.panel.pauseGame(player.connection.toString());
 					}
 					
-					if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
-						mainPlayer.setY(playerResponseValues.playerY);
-					} else if(this.matchPlayerPort(port) == Definitions.OTHER_PLAYER) {
-						otherPlayer.setY(playerResponseValues.playerY);
-					}
+					player.setY(playerResponseValues.playerY);
 				} catch (RuntimeException e) {
 					e.printStackTrace();
 				} catch (SocketException e) {
-					this.mainPlayer.setConnectionPort(0);
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}
@@ -104,42 +89,4 @@ public class ReceiveServer  extends Thread {
 			errors.log(Level.SEVERE, e.getMessage(), e);
 		}
 	}
-	
-	private void handlePlayerLeaving(PlayerResponse playerResponseValues, int port) {
-		if (playerResponseValues.leavingGame) {
-			if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
-				mainPlayer.leftGame();
-			} else if(this.matchPlayerPort(port) == Definitions.OTHER_PLAYER) {
-				otherPlayer.leftGame();
-			}
-		}
-	}
-	
-	private void handlePlayersNotConnected(PlayerResponse playerResponseValues, int port) {
-		if (!mainPlayer.isConnected() || !otherPlayer.isConnected()) {
-			if (port == mainPlayer.getConnectionPort()) return;
-			if (!mainPlayer.isConnected()) {
-				mainPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
-				mainPlayer.setConnectionPort(port);
-				mainPlayer.setConnected(true);
-			} else if (!otherPlayer.isConnected()) {
-				otherPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
-				otherPlayer.setConnectionPort(port);
-				otherPlayer.setConnected(true);
-			}
-		}
-	}
-	
-	private void assignPlayersReady(PlayerResponse playerResponseValues, int port) {
-		if (!mainPlayer.isReady() || !otherPlayer.isReady()) {
-			if (!playerResponseValues.ready) return;
-			if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
-				mainPlayer.setReady();
-			} else if(this.matchPlayerPort(port) == Definitions.OTHER_PLAYER) {
-				otherPlayer.setReady();
-			}
-		}
-	
-	}
-	
 }

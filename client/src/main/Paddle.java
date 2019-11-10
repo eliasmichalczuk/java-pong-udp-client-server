@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.io.Serializable;
+import java.net.Socket;
 import java.util.Calendar;
 
 public class Paddle extends Component implements PanelElement, Serializable {
@@ -13,11 +14,12 @@ public class Paddle extends Component implements PanelElement, Serializable {
 	private double yVel;
 	private boolean upAccel, downAccel;
 	private int player, x, y, priorYValue, score, roundsWon;
-	private boolean connected, wantsToPause, wantToQuit, leavingGame, gamePaused;
+	private boolean wantsToPause, wantToQuit, leavingGame, gamePaused;
 	public boolean wantsRestartAfterGameEndedByValue;
 	private Calendar timeLastReceivedValue;
 	private int sendConnectionPort = Definitions.DEFAULT_PORT_SEND;
 	private int receiveConnectionPort = Definitions.DEFAULT_PORT_RECEIVE;
+	public Socket connection;
 	
 	public int getReceiveConnectionPort() {
 		return receiveConnectionPort;
@@ -31,11 +33,7 @@ public class Paddle extends Component implements PanelElement, Serializable {
 	private boolean ready = false;
 	
 	public boolean isConnected() {
-		return connected;
-	}
-
-	public void setConnected(boolean connected) {
-		this.connected = connected;
+		return this.connection != null;
 	}
 
 	public int getConnectionPort() {

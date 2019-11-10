@@ -1,6 +1,9 @@
 package main;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -42,16 +45,10 @@ public class ReceiveClient extends Thread implements Serializable {
 			e.printStackTrace();
 		}
 
-		try (DatagramSocket socket = new DatagramSocket()) {
-			System.out.println(" socket" + socket.getLocalAddress());
-			System.out.println(" socket" + socket.getLocalPort());
-			this.mainPlayer.setReceiveConnectionPort(socket.getLocalPort());
+		try (DataInputStream in = new DataInputStream(this.mainPlayer.connection.getInputStream())) {
 			while (true) {
-
-				responsePacket = new DatagramPacket(new byte[576], 576);
 				try {
-					socket.receive(responsePacket);
-					ByteArrayInputStream in = new ByteArrayInputStream(responsePacket.getData());
+//					ByteArrayInputStream in = new ByteArrayInputStream(responsePacket.getData());
 					ObjectInputStream is = new ObjectInputStream(in);
 					BallLocalizationValues gameValues = (BallLocalizationValues) is.readObject();
 					// System.out.println("handling " + gameValues.gameState + "handling " + gameValues.gameStartingValue + "handling " + gameValues.playerType);
@@ -61,7 +58,9 @@ public class ReceiveClient extends Thread implements Serializable {
 					mainPlayer.setTimeLastReceivedValue(Calendar.getInstance());
 
 				} catch (IOException e) {
+					System.out.println("Servidor parou. ");
 					e.printStackTrace();
+					break;
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}
@@ -69,6 +68,9 @@ public class ReceiveClient extends Thread implements Serializable {
 			}
 		} catch (SocketException e1) {
 			e1.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("Error reading from server. ");
+			e.printStackTrace();
 		}
 
 	}
