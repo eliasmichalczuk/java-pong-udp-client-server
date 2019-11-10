@@ -7,6 +7,8 @@ import java.io.Serializable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Calendar;
@@ -22,9 +24,9 @@ public class ReceiveClient extends Thread implements Serializable {
 	private Panel panel;
 
 	private final String hostName = "localhost";
-	private final int port = 4445;
 	private InetAddress address;
 	private DatagramPacket responsePacket;
+	private SocketAddress sktAddress;
 
 	public ReceiveClient(Paddle mainPlayer, Paddle otherPlayer, Ball ball, Panel panel) {
 		this.mainPlayer = mainPlayer;
@@ -37,14 +39,15 @@ public class ReceiveClient extends Thread implements Serializable {
 	public void run() {
 
 		try {
-			this.address = InetAddress.getByName(hostName);
+			this.address = InetAddress.getLocalHost();
+			sktAddress = new InetSocketAddress("localhost", 0);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
 
 		try (DatagramSocket socket = new DatagramSocket()) {
-			System.out.println(" socket" + socket.getLocalAddress());
-			System.out.println(" socket" + socket.getLocalPort());
+			System.out.println(" socket local address " + socket.getLocalAddress());
+			System.out.println(" socket local port " + socket.getLocalPort());
 			this.mainPlayer.setReceiveConnectionPort(socket.getLocalPort());
 			while (true) {
 

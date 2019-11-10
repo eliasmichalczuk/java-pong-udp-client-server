@@ -166,6 +166,8 @@ public class Panel extends JPanel{
 	public void restartGameAfterEndByScore() {
 		mainPlayer.setWantsToPause(false);
 		mainPlayer.setReady();
+		mainPlayer.reset();
+		otherPlayer.reset();
 		this.mainPlayer.wantsRestartAfterGameEndedByValue = true;
 	}
 

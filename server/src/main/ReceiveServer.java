@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
@@ -64,30 +65,30 @@ public class ReceiveServer  extends Thread {
 					ObjectInputStream is = new ObjectInputStream(in);
 					PlayerResponse playerResponseValues = (PlayerResponse) is.readObject();
 					int port = request.getPort();
-					
+
 					if(panel.getMaxRounds() == 0) {
 						panel.setMaxRounds(playerResponseValues.maxRounds);
 						panel.setMaxScore(playerResponseValues.maxScore);
 					}
 					
 					handlePlayersNotConnected(playerResponseValues, port);
-					assignPlayersReady(playerResponseValues, port);
-					handlePlayerLeaving(playerResponseValues, port);
+					assignPlayersReady(playerResponseValues, port, address);
+					handlePlayerLeaving(playerResponseValues, port, address);
 					
 					if (playerResponseValues.wantsRestartAfterGameEndedByValue && panel.getState() == 7) {
 						this.panel.resetGame();
 					}
 					
 					if(panel.getState() == 2 && !playerResponseValues.wantsToPause) {
-						this.panel.unPauseGame(port);
+						this.panel.unPauseGame(port, address);
 					}
 					if(playerResponseValues.wantsToPause) {
-						this.panel.pauseGame(port);
+						this.panel.pauseGame(port, address);
 					}
 					
-					if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
+					if (mainPlayer.address == address.getHostAddress() && port == this.mainPlayer.getConnectionPort()) {
 						mainPlayer.setY(playerResponseValues.playerY);
-					} else if(this.matchPlayerPort(port) == Definitions.OTHER_PLAYER) {
+					} else if (otherPlayer.address == address.getHostAddress() && port == this.otherPlayer.getConnectionPort()) {
 						otherPlayer.setY(playerResponseValues.playerY);
 					}
 				} catch (RuntimeException e) {
@@ -105,37 +106,44 @@ public class ReceiveServer  extends Thread {
 		}
 	}
 	
-	private void handlePlayerLeaving(PlayerResponse playerResponseValues, int port) {
+	private void handlePlayerLeaving(PlayerResponse playerResponseValues, int port, InetAddress address) {
 		if (playerResponseValues.leavingGame) {
-			if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
+			if (mainPlayer.address == address.getHostAddress() && port == this.mainPlayer.getConnectionPort()) {
 				mainPlayer.leftGame();
-			} else if(this.matchPlayerPort(port) == Definitions.OTHER_PLAYER) {
+			} else if(otherPlayer.address == address.getHostAddress() && port == this.otherPlayer.getConnectionPort()) {
 				otherPlayer.leftGame();
 			}
 		}
 	}
 	
 	private void handlePlayersNotConnected(PlayerResponse playerResponseValues, int port) {
+		String hostad = address.getHostAddress();
+		String hostassd = "";
+		if (mainPlayer.address == address.getHostAddress() && port == this.mainPlayer.getConnectionPort()) {
+			return;
+		}
 		if (!mainPlayer.isConnected() || !otherPlayer.isConnected()) {
-			if (port == mainPlayer.getConnectionPort()) return;
+
 			if (!mainPlayer.isConnected()) {
+				mainPlayer.address = address.getHostAddress().toString();
+				
 				mainPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
 				mainPlayer.setConnectionPort(port);
-				mainPlayer.setConnected(true);
-			} else if (!otherPlayer.isConnected()) {
+			} else if (!otherPlayer.isConnected() && (mainPlayer.address != address.getHostAddress().toString() && port != mainPlayer.getConnectionPort())) {
+				hostassd = mainPlayer.address;
+				otherPlayer.address = address.getHostAddress().toString();
 				otherPlayer.setReceiveConnectionPort(playerResponseValues.playerReceivePort);
 				otherPlayer.setConnectionPort(port);
-				otherPlayer.setConnected(true);
 			}
 		}
 	}
 	
-	private void assignPlayersReady(PlayerResponse playerResponseValues, int port) {
+	private void assignPlayersReady(PlayerResponse playerResponseValues, int port, InetAddress address) {
 		if (!mainPlayer.isReady() || !otherPlayer.isReady()) {
 			if (!playerResponseValues.ready) return;
-			if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
+			if (mainPlayer.address == address.getHostAddress() && port == this.mainPlayer.getConnectionPort()) {
 				mainPlayer.setReady();
-			} else if(this.matchPlayerPort(port) == Definitions.OTHER_PLAYER) {
+			} else if(otherPlayer.address == address.getHostAddress() && port == this.otherPlayer.getConnectionPort()) {
 				otherPlayer.setReady();
 			}
 		}

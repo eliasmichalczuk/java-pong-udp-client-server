@@ -27,29 +27,30 @@ public class Client extends Thread implements Serializable {
 	private Ball ball;
 	private Panel panel;
 
-	private final String hostName = "localhost";
-	private final int port = 4446;
+	private String hostName = "";
+	private int port;
 	private InetAddress address;
 	private DatagramPacket responsePacket;
 
 	public  int maxRounds;
 	public int maxScore;
 
-	public Client(Paddle mainPlayer, Paddle otherPlayer, Ball ball, Panel panel, int maxRounds, int maxScore) {
+	public Client(Paddle mainPlayer, Paddle otherPlayer, Ball ball, Panel panel, int maxRounds, int maxScore, String serverAddress, int serverPort) {
 		this.mainPlayer = mainPlayer;
 		this.otherPlayer = otherPlayer;
 		this.ball = ball;
 		this.panel = panel;
 		this.maxRounds = maxRounds;
 		this.maxScore = maxScore;
+		this.hostName = serverAddress;
+		this.port = serverPort;
 	}
 
 	@Override
 	public void run() {
 
 		try (DatagramSocket socket = new DatagramSocket()) {
-			System.out.println(" socket" + socket.getLocalAddress());
-			System.out.println(" socket" + socket.getLocalPort());
+			System.out.println(" socket inet address send " + socket.getLocalSocketAddress());
 			try {
 				this.address = InetAddress.getByName(hostName);
 			} catch (UnknownHostException e) {
@@ -94,7 +95,6 @@ public class Client extends Thread implements Serializable {
 				Thread.yield();
 			}
 		} catch (SocketException | InterruptedException e2) {
-			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
 	}
@@ -103,12 +103,15 @@ public class Client extends Thread implements Serializable {
 		
 		
 		// Clien run with "SERVER_ADDRESS ROUNDS POINTS"
-		int maxRounds, maxScore;
+		int maxRounds, maxScore, serverPort;
+		String serverAddress;
 		try {
-			maxRounds = Integer.parseInt(args[0]);
-			maxScore = Integer.parseInt(args[1]);
+			serverAddress = args[0];
+			serverPort = Integer.parseInt(args[1]);
+			maxRounds = Integer.parseInt(args[2]);
+			maxScore = Integer.parseInt(args[3]);
 		} catch (RuntimeException ex) {
-			System.err.println("Uso: SERVER_ADDRESS ROUNDS POINTS");
+			System.err.println("Uso: java Client SERVER_ADDRESS SERVER_PORT ROUNDS POINTS");
 			return;
 		}
 		
@@ -135,7 +138,7 @@ public class Client extends Thread implements Serializable {
 
 		GameThread gt = new GameThread(panel);
 		gt.start();
-		Client sendThread = new Client(mainPlayer, otherPlayer, ball, panel, maxRounds, maxScore);
+		Client sendThread = new Client(mainPlayer, otherPlayer, ball, panel, maxRounds, maxScore, serverAddress, serverPort);
 		sendThread.start();
 		ReceiveClient receiveThread = new ReceiveClient(mainPlayer, otherPlayer, ball, panel);
 		receiveThread.start();

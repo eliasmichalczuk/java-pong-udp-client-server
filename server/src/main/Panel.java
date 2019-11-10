@@ -1,5 +1,6 @@
 package main;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,21 +10,24 @@ public class Panel {
 	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting, 7 game ended by max score
 	private int state = 0;
 	private int playerPausedConnectionPort = 0;
+	private String playerPausedAddress;
 	private int maxRounds, maxScore, currentRound = 1;
 	
 	public int getState() {
 		return state;
 	}
 	
-	public void pauseGame(int playerConnectionPort) {
+	public void pauseGame(int playerConnectionPort, InetAddress address) {
 		this.setState(2);
-		playerPausedConnectionPort = playerConnectionPort; 
+		playerPausedConnectionPort = playerConnectionPort;
+		playerPausedAddress = address.getHostAddress();
 	}
 	
-	public void unPauseGame(int playerConnectionPort) {
-		if (playerConnectionPort == playerPausedConnectionPort) {
+	public void unPauseGame(int playerConnectionPort, InetAddress address) {
+		if (playerConnectionPort == playerPausedConnectionPort && playerPausedAddress == address.getHostAddress()) {
 			setState(1);
 			playerPausedConnectionPort = 0;
+			playerPausedAddress = "";
 		}
 	}
 

@@ -8,6 +8,8 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -31,6 +33,7 @@ public class Server extends Thread {
 	private final Logger errors = Logger.getLogger("errors");
 	private final int port = 4445;
 	private InetAddress address;
+	private SocketAddress sktAddress;
 	private final String hostName = "localhost";
 	private int gameStartingValue = 0;
 	private int calendarSeconds; 
@@ -60,6 +63,7 @@ public class Server extends Thread {
 		boolean connectionOpen = true;
 		try {
 			address = InetAddress.getByName(hostName);
+			sktAddress = new InetSocketAddress("localhost", 0);
 		} catch (UnknownHostException e1) {
 			e1.printStackTrace();
 		}
@@ -90,19 +94,29 @@ public class Server extends Thread {
 					try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 							ObjectOutputStream os = new ObjectOutputStream(outputStream)) {
 						os.writeObject(mainPlayerValues);
-
 						byte[] valuesByteFormat = outputStream.toByteArray();
-						DatagramPacket mainPlayerPacket = new DatagramPacket(valuesByteFormat, valuesByteFormat.length,
-								address, this.mainPlayer.getReceiveConnectionPort());
-						socket.send(mainPlayerPacket);
+						
+						if (mainPlayer.address != "") {
+							if (mainPlayer.inetAddresss == null) {
+								mainPlayer.inetAddresss = InetAddress.getByName(mainPlayer.address);
+							}
+							DatagramPacket mainPlayerPacket = new DatagramPacket(valuesByteFormat, valuesByteFormat.length,
+									mainPlayer.inetAddresss, this.mainPlayer.getReceiveConnectionPort());
+							socket.send(mainPlayerPacket);
+						}
 
-						outputStream.reset();
-						ObjectOutputStream ous = new ObjectOutputStream(outputStream);
-						ous.writeObject(otherPlayerValues);
-						valuesByteFormat = outputStream.toByteArray();
-						DatagramPacket otherPlayerPacket = new DatagramPacket(valuesByteFormat, valuesByteFormat.length,
-								address, this.otherPlayer.getReceiveConnectionPort());
-						socket.send(otherPlayerPacket);
+						if (otherPlayer.address != "") {
+							if (otherPlayer.inetAddresss == null) {
+								otherPlayer.inetAddresss = InetAddress.getByName(otherPlayer.address);
+							}
+							outputStream.reset();
+							ObjectOutputStream ous = new ObjectOutputStream(outputStream);
+							ous.writeObject(otherPlayerValues);
+							valuesByteFormat = outputStream.toByteArray();
+							DatagramPacket otherPlayerPacket = new DatagramPacket(valuesByteFormat, valuesByteFormat.length,
+									otherPlayer.inetAddresss, this.otherPlayer.getReceiveConnectionPort());
+							socket.send(otherPlayerPacket);
+						}
 					} catch (SocketException e) {
 						e.printStackTrace();
 					}
@@ -190,18 +204,6 @@ public class Server extends Thread {
 	}
 
 	public static void main(String[] args) {
-//		Thread server = new Server();
-//		server.start();
-		loadElements();
-	}
-	
-	public int invertHorizontalBallValue(int x) {
-		int width = this.panel.width;
-		return width - x;
-	}
-
-	public static void loadElements() {
-
 		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
 		Paddle otherPlayer = new Paddle(Definitions.OTHER_PLAYER);
 		Panel panel = new Panel(mainPlayer, otherPlayer);
@@ -219,6 +221,10 @@ public class Server extends Thread {
 
 		GameThread gt = new GameThread(panel);
 		gt.start();
-
+	}
+	
+	public int invertHorizontalBallValue(int x) {
+		int width = this.panel.width;
+		return width - x;
 	}
 }

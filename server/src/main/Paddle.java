@@ -1,13 +1,17 @@
 package main;
+
+import java.net.InetAddress;
+
 public class Paddle implements PanelElement {
 
 	private static final long serialVersionUID = 1429077799586317462L;
 	private double yVel;
 	private boolean upAccel, downAccel;
 	private int player, x, y, priorYValue, score = 0, roundsWon = 0;
-	private boolean connected = false;
 	private int sendConnectionPort = Definitions.DEFAULT_PORT_SEND;
 	private int receiveConnectionPort = Definitions.DEFAULT_PORT_RECEIVE;
+	public String address = "";
+	public InetAddress inetAddresss;
 	public int getReceiveConnectionPort() {
 		return receiveConnectionPort;
 	}
@@ -35,15 +39,7 @@ public class Paddle implements PanelElement {
 	}
 
 	public boolean isConnected() {
-		return connected;
-	}
-
-	public void setConnected(boolean connected) {
-		this.connected = true;
-	}
-	
-	public void setDisconnected() {
-		this.connected = false;
+		return address != null;
 	}
 
 	public double getyVel() {
@@ -116,7 +112,7 @@ public class Paddle implements PanelElement {
 	public void leftGame() {
 		setReceiveConnectionPort(Definitions.DEFAULT_PORT_RECEIVE);
 		setConnectionPort(Definitions.DEFAULT_PORT_RECEIVE);
-		setConnected(false);
+		address = null;
 	}
 	
 	public int getPriorYValue() {

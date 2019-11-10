@@ -44,14 +44,12 @@ public class Ball implements PanelElement {
 	
 	public void paint() {
 
-		this.move();
+		if (game.getState() == 1) {
+			this.move();	
+		}
 	}
 	
 	private void move() {
-		
-		if (game.getState() == 2 || game.getState() == 7 || game.getState() == 3) {
-			return;
-		}
 		
 		if (motionX == 0) {
 			setX(getX() + (speed + (amountOfHits/3)));
