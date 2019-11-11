@@ -84,10 +84,12 @@ public class Panel extends JPanel{
             g.drawString("you      rival     max rounds: " + maxRounds, 290, 15);
             g.drawString("scores " + this.mainPlayer.getScore() + "               " + this.otherPlayer.getScore(), 215, 45);
             g.drawString("rounds " + this.mainPlayer.getRoundsWon()+ "               " + this.otherPlayer.getRoundsWon(), 210, 75);
-        } else if (state == 4) {
-        	g.drawString("Waiting for player...", 290, 15);
+        } else if (state == 4 && mainPlayer.isReady()) {
+        	g.drawString("Waiting for player to press ENTER...", 290, 150);
+        } else if (state == 4 && !mainPlayer.isReady()) {
+        	g.drawString("Press ENTER to be ready", 290, 150);
         } else if (state == 5) {
-        	g.drawString("Starting in " + gameStartingValue, 265, 15);
+        	g.drawString("Starting in " + gameStartingValue, 265, 150);
         } else if (state == 2) {
             g.drawString("you      rival     max rounds: " + maxRounds, 290, 15);
             g.drawString("scores " + this.mainPlayer.getScore() + "               " + this.otherPlayer.getScore(), 215, 45);
@@ -119,7 +121,7 @@ public class Panel extends JPanel{
     }
 	
 	private void setGameInitialized(Graphics g) {
-		g.drawString("Press ENTER to be READY", 330, 15);
+		g.drawString("GAME INITIALIZING, waiting for player to connect", 150, 150);
 	}
 
 	public void startGame() {

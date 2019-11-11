@@ -19,9 +19,6 @@ public class ReceiveServer  extends Thread {
 	
 	private final Logger audit = Logger.getLogger("requests");
 	private final Logger errors = Logger.getLogger("errors");
-	private final int port = 4446;
-	private InetAddress address;
-	private final String hostName = "localhost";
 	
 	private Paddle player;
 	private Panel panel;
@@ -38,11 +35,7 @@ public class ReceiveServer  extends Thread {
 	@Override
 	public void run() {
 		boolean connectionOpen = true;
-		try {
-			address = InetAddress.getByName(hostName);
-		} catch (UnknownHostException e1) {
-			e1.printStackTrace();
-		}
+
 		try(DataInputStream in = new DataInputStream(this.player.connection.getInputStream())) {
 			while (connectionOpen) {
 				

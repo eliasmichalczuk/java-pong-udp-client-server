@@ -27,7 +27,7 @@ public class PlayerActionsHandler {
 	}
 
 	void assignPlayersReady(PlayerResponse playerResponseValues, Paddle player) {
-		if (!player.isReady()) {
+		if (playerResponseValues.ready) {
 			player.setReady();
 		}
 

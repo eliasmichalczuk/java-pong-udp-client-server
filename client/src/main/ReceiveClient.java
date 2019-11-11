@@ -24,9 +24,7 @@ public class ReceiveClient extends Thread implements Serializable {
 	private Ball ball;
 	private Panel panel;
 
-	private final String hostName = "localhost";
 	private final int port = 4445;
-	private InetAddress address;
 	private DatagramPacket responsePacket;
 
 	public ReceiveClient(Paddle mainPlayer, Paddle otherPlayer, Ball ball, Panel panel) {
@@ -39,19 +37,12 @@ public class ReceiveClient extends Thread implements Serializable {
 	@Override
 	public void run() {
 
-		try {
-			this.address = InetAddress.getByName(hostName);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
 
 		try (DataInputStream in = new DataInputStream(this.mainPlayer.connection.getInputStream())) {
 			while (true) {
 				try {
-//					ByteArrayInputStream in = new ByteArrayInputStream(responsePacket.getData());
 					ObjectInputStream is = new ObjectInputStream(in);
 					BallLocalizationValues gameValues = (BallLocalizationValues) is.readObject();
-					// System.out.println("handling " + gameValues.gameState + "handling " + gameValues.gameStartingValue + "handling " + gameValues.playerType);
 
 					this.handleGameState(gameValues);
 					this.setLocalValues(gameValues);

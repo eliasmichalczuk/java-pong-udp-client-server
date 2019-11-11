@@ -38,8 +38,6 @@ public class Server extends Thread {
 	private final Logger audit = Logger.getLogger("requests");
 	private final Logger errors = Logger.getLogger("errors");
 	private final int port = 4445;
-	private InetAddress address;
-	private final String hostName = "localhost";
 	private int gameStartingValue = 0;
 	private int calendarSeconds; 
 	private Calendar calendar;
@@ -66,14 +64,10 @@ public class Server extends Thread {
 	@Override
 	public void run() {
 		boolean connectionOpen = true;
-		try {
-			address = InetAddress.getByName(hostName);
-		} catch (UnknownHostException e1) {
-			e1.printStackTrace();
-		}
+
 		try (DataOutputStream outMain = new DataOutputStream(this.mainPlayer.connection.getOutputStream());
 				DataOutputStream outOpponnent = new DataOutputStream(this.otherPlayer.connection.getOutputStream())) {
-			while (connectionOpen) {
+			while (connectionOpen && !this.mainPlayer.connection.isClosed() && !this.otherPlayer.connection.isClosed()) {
 
 				gameStartCountdown();
 				Thread.sleep(20);
@@ -101,8 +95,6 @@ public class Server extends Thread {
 						os.writeObject(mainPlayerValues);
 
 						byte[] valuesByteFormat = outputStream.toByteArray();
-						DatagramPacket mainPlayerPacket = new DatagramPacket(valuesByteFormat, valuesByteFormat.length,
-								address, 0);
 //						socket.send(mainPlayerPacket);
 						outMain.write(valuesByteFormat);
 						outMain.flush();
@@ -111,12 +103,12 @@ public class Server extends Thread {
 						ObjectOutputStream ous = new ObjectOutputStream(outputStream);
 						ous.writeObject(otherPlayerValues);
 						valuesByteFormat = outputStream.toByteArray();
-						DatagramPacket otherPlayerPacket = new DatagramPacket(valuesByteFormat, valuesByteFormat.length,
-								address, 0);
 						
 						//socket.send(otherPlayerPacket);
-						outOpponnent.write(valuesByteFormat);
-						outOpponnent.flush();
+						
+							outOpponnent.write(valuesByteFormat);
+							outOpponnent.flush();
+						
 					} catch (SocketException e) {
 						System.out.println("Player disconnected ");
 						e.printStackTrace();
@@ -159,39 +151,23 @@ public class Server extends Thread {
 	}
 
 	private int getGameState(int port) {
-		return panel.getState();
-//		if (panel.getState() == 1) {
-//			return 1;
-//		} else if (panel.getState() == 2) {
-//			return 2;
-//		} else if (panel.getState() == 7) {
-//			return 7;
-//		}
-//		if (this.matchPlayerPort(port) == Definitions.MAIN_PLAYER) {
-//			if (mainPlayer.isReady() && !otherPlayer.isReady()) {
-//				// waiting
-//				return 0;
-//			} else if (!mainPlayer.isReady() && !otherPlayer.isReady()) {
-//				// not ready
-//				return 4;
-//			} else if (mainPlayer.isReady() && otherPlayer.isReady() && panel.getState() == 5) {
-//				// starting
-//				return 5;
-//			}
-//			return -1;
-//		} else {
-//			if (otherPlayer.isReady() && !mainPlayer.isReady()) {
-//				// waiting
-//				return 0;
-//			} else if (!mainPlayer.isReady() && !otherPlayer.isReady()) {
-//				// not ready
-//				return 4;
-//			} else if (mainPlayer.isReady() && otherPlayer.isReady() && panel.getState() == 5) {
-//				// starting
-//				return 5;
-//			}
-//			return -1;
-//		}
+//		return panel.getState();
+		if (!mainPlayer.isReady() || !otherPlayer.isReady()) {
+			// waiting
+			return 4;
+		}
+		if (panel.getState() == 1) {
+			return 1;
+		} else if (panel.getState() == 2) {
+			return 2;
+		} else if (panel.getState() == 7) {
+			return 7;
+		}
+		 else if (mainPlayer.isReady() && otherPlayer.isReady() && panel.getState() == 5) {
+			// starting
+			return 5;
+		}
+		return -1;
 	}
 
 	public static void main(String[] args) {
@@ -244,6 +220,7 @@ public class Server extends Thread {
 
 		GameThread gt = new GameThread(panel);
 		gt.start();
+		System.out.println("returned ");
 
 	}
 }

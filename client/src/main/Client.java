@@ -29,11 +29,7 @@ public class Client extends Thread implements Serializable {
 	private Ball ball;
 	private Panel panel;
 
-	private final String hostName = "localhost";
 	private final int port = 4446;
-	private InetAddress address;
-	private DatagramPacket responsePacket;
-
 	public  int maxRounds;
 	public int maxScore;
 
@@ -50,11 +46,7 @@ public class Client extends Thread implements Serializable {
 	public void run() {
 
 		try (DataOutputStream out = new DataOutputStream(this.mainPlayer.connection.getOutputStream())) {
-			try {
-				this.address = InetAddress.getByName(hostName);
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			}
+
 			mainPlayer.setTimeLastReceivedValue(Calendar.getInstance());
 			while (true) {
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -87,6 +79,9 @@ public class Client extends Thread implements Serializable {
 //					DatagramPacket playerRequestPacket = new DatagramPacket(obj, obj.length, address, port);
 					out.write(obj);
 					out.flush();
+				} catch (SocketException e) {
+					System.out.println("Server closed ");
+					break;
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

@@ -18,7 +18,6 @@ public class Model implements KeyListener, ActionListener  {
 	private JFrame frame;
 	private Paddle otherPlayer;
 	private Ball ball;
-	private final String hostName = "localhost";
 	private final int port = 4446;
 	
 	public Model(Paddle mainPlayer, Paddle otherPlayer, Panel panel, JFrame frame, Ball ball) {
