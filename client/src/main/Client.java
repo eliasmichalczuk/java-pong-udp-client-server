@@ -55,8 +55,7 @@ public class Client extends Thread implements Serializable {
 					
 					if (Calendar.getInstance().get(Calendar.SECOND) -
 							mainPlayer.getTimeLastReceivedValue().get(Calendar.SECOND) > 3
-							&& mainPlayer.isLeavingGame()) {
-						panel.closeGameWindow();
+							&& !mainPlayer.isLeavingGame()) {
 					}
 					
 					while (mainPlayer.getReceiveConnectionPort() == 0) {
@@ -143,6 +142,7 @@ public class Client extends Thread implements Serializable {
 		Socket client;
 		try {
 			client = new Socket(serverId, port);
+			System.out.println("port : " + client.getLocalPort());
 			mainPlayer.connection = client;
 			GameThread gt = new GameThread(panel);
 			gt.start();

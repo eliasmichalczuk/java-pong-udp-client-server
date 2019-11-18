@@ -9,8 +9,6 @@ public class Paddle implements PanelElement {
 	private boolean upAccel, downAccel;
 	private int player, x, y, priorYValue, score = 0, roundsWon = 0;
 	public Socket connection;
-//	private int sendConnectionPort = Definitions.DEFAULT_PORT_SEND;
-//	private int receiveConnectionPort = Definitions.DEFAULT_PORT_RECEIVE;
 	private int playerType = Definitions.DEFAULT_PLAYER;
 	private boolean ready = false;
 
@@ -31,7 +29,7 @@ public class Paddle implements PanelElement {
 	}
 
 	public boolean isConnected() {
-		return this.connection != null;
+		return this.connection != null && !this.connection.isClosed();
 	}
 
 
@@ -135,6 +133,14 @@ public class Paddle implements PanelElement {
 		this.score++;
 	}
 	
+	@Override
+	public String toString() {
+		return "Paddle [yVel=" + yVel + ", upAccel=" + upAccel + ", downAccel=" + downAccel + ", player=" + player
+				+ ", x=" + x + ", y=" + y + ", priorYValue=" + priorYValue + ", score=" + score + ", roundsWon="
+				+ roundsWon + ", playerType=" + playerType + ", ready=" + ready
+				+ ", width=" + width + ", height=" + height + "]";
+	}
+
 	public void reset() {
 		this.roundsWon = 0;
 		this.score = 0;

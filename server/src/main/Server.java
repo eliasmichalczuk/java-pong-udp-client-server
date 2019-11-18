@@ -39,22 +39,31 @@ public class Server extends Thread {
 	private final Logger errors = Logger.getLogger("errors");
 	private final int port = 4445;
 	private int gameStartingValue = 0;
-	private int calendarSeconds; 
+	private int calendarSeconds;
 	private Calendar calendar;
 	private boolean countStarted = false;
 
 	private Paddle mainPlayer;
-	private Paddle otherPlayer;
+	private Paddle opponentPlayer;
 	private Panel panel;
 	private ZonedDateTime time;
 
-	public Server(Ball ball, Paddle mainPlayer, Paddle otherPlayer, Panel panel) {
+	private PlayerClosedConnectionCallback cb;
+
+	private ReceiveServer mainThread;
+
+	private ReceiveServer oppoThread;
+
+	public Server(Ball ball, Paddle mainPlayer, Paddle otherPlayer, Panel panel, PlayerClosedConnectionCallback cb, ReceiveServer mainThread, ReceiveServer oppoThread) {
 		this.mainPlayer = mainPlayer;
-		this.otherPlayer = otherPlayer;
+		this.opponentPlayer = otherPlayer;
 		this.ball = ball;
 		this.panel = panel;
+		this.cb = cb;
+		this.mainThread = mainThread;
+		this.oppoThread = oppoThread;
 	}
-	
+
 	private void startGame() {
 		this.panel.setState(1);
 		this.ball.reset();
@@ -63,64 +72,69 @@ public class Server extends Thread {
 
 	@Override
 	public void run() {
-		boolean connectionOpen = true;
 
-		try (DataOutputStream outMain = new DataOutputStream(this.mainPlayer.connection.getOutputStream());
-				DataOutputStream outOpponnent = new DataOutputStream(this.otherPlayer.connection.getOutputStream())) {
-			while (connectionOpen && !this.mainPlayer.connection.isClosed() && !this.otherPlayer.connection.isClosed()) {
+		while (true) {
+			try (DataOutputStream outMain = new DataOutputStream(this.mainPlayer.connection.getOutputStream());
+					DataOutputStream outOpponnent = new DataOutputStream(
+							this.opponentPlayer.connection.getOutputStream())) {
+				while (!this.mainPlayer.connection.isClosed()
+						&& !this.opponentPlayer.connection.isClosed()) {
 
-				gameStartCountdown();
-				Thread.sleep(20);
-
-				try {
-					BallLocalizationValues mainPlayerValues = new BallLocalizationValues(
-							(int) ball.getX(), ball.y,
-							this.mainPlayer.getScore(), this.otherPlayer.getScore(),
-							Definitions.MAIN_PLAYER, gameStartingValue,
-							this.getGameState(0),
-							otherPlayer.getY(), panel.getMaxRounds(),
-							panel.getMaxScore(), mainPlayer.getRoundsWon(), otherPlayer.getRoundsWon());
+					gameStartCountdown();
+					Thread.sleep(20);
 					
-					BallLocalizationValues otherPlayerValues = new BallLocalizationValues(
-							this.invertHorizontalBallValue(ball.getX()), ball.y,
-							this.otherPlayer.getScore(), this.mainPlayer.getScore(),
-							Definitions.OTHER_PLAYER, gameStartingValue,
-							this.getGameState(0),
-							mainPlayer.getY(), panel.getMaxRounds(),
-							panel.getMaxScore(), otherPlayer.getRoundsWon(), mainPlayer.getRoundsWon());
+					try {
+						BallLocalizationValues mainPlayerValues = new BallLocalizationValues((int) ball.getX(), ball.y,
+								this.mainPlayer.getScore(), this.opponentPlayer.getScore(), Definitions.MAIN_PLAYER,
+								gameStartingValue, this.getGameState(0), opponentPlayer.getY(), panel.getMaxRounds(),
+								panel.getMaxScore(), mainPlayer.getRoundsWon(), opponentPlayer.getRoundsWon());
 
+						BallLocalizationValues otherPlayerValues = new BallLocalizationValues(
+								this.invertHorizontalBallValue(ball.getX()), ball.y, this.opponentPlayer.getScore(),
+								this.mainPlayer.getScore(), Definitions.OTHER_PLAYER, gameStartingValue,
+								this.getGameState(0), mainPlayer.getY(), panel.getMaxRounds(), panel.getMaxScore(),
+								opponentPlayer.getRoundsWon(), mainPlayer.getRoundsWon());
 
-					try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-							ObjectOutputStream os = new ObjectOutputStream(outputStream)) {
-						os.writeObject(mainPlayerValues);
+						try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+								ObjectOutputStream os = new ObjectOutputStream(outputStream)) {
+							os.writeObject(mainPlayerValues);
 
-						byte[] valuesByteFormat = outputStream.toByteArray();
-//						socket.send(mainPlayerPacket);
-						outMain.write(valuesByteFormat);
-						outMain.flush();
-						outputStream.reset();
-						
-						ObjectOutputStream ous = new ObjectOutputStream(outputStream);
-						ous.writeObject(otherPlayerValues);
-						valuesByteFormat = outputStream.toByteArray();
-						
-						//socket.send(otherPlayerPacket);
-						
+							byte[] valuesByteFormat = outputStream.toByteArray();
+							outMain.write(valuesByteFormat);
+							outMain.flush();
+							outputStream.reset();
+
+							ObjectOutputStream ous = new ObjectOutputStream(outputStream);
+							ous.writeObject(otherPlayerValues);
+							valuesByteFormat = outputStream.toByteArray();
+
 							outOpponnent.write(valuesByteFormat);
 							outOpponnent.flush();
-						
-					} catch (SocketException e) {
-						System.out.println("Player disconnected ");
-						e.printStackTrace();
-						break;
-					}
 
-				} catch (RuntimeException e) {
-					e.printStackTrace();
+						} catch (Exception e) {
+							System.out.println("Player disconnected ");
+							e.printStackTrace();
+							if (this.mainPlayer.connection.isClosed()) {
+								this.cb.waitForPlayerReconnect(this.mainPlayer, this.mainThread);
+							} else {
+								this.cb.waitForPlayerReconnect(this.opponentPlayer, this.oppoThread);
+							}
+							break;
+						}
+
+					} catch (RuntimeException e) {
+						e.printStackTrace();
+					}
 				}
+			}  catch (NullPointerException | SocketException e) {
+				if (this.mainPlayer.connection == null) {
+					this.cb.waitForPlayerReconnect(this.mainPlayer, this.mainThread);
+				} else {
+					this.cb.waitForPlayerReconnect(this.opponentPlayer, this.oppoThread);
+				}
+			} catch (IOException | InterruptedException e) {
+				errors.log(Level.SEVERE, e.getMessage(), e);
 			}
-		} catch (IOException | InterruptedException e) {
-			errors.log(Level.SEVERE, e.getMessage(), e);
 		}
 	}
 
@@ -128,8 +142,7 @@ public class Server extends Thread {
 		if (panel.getState() == 1) {
 			return;
 		}
-		if (mainPlayer.isReady() && otherPlayer.isReady() && this.panel.getState() == 0
-				|| this.panel.getState() == 5) {
+		if (mainPlayer.isReady() && opponentPlayer.isReady() && this.panel.getState() == 0 || this.panel.getState() == 5) {
 			this.calendar = Calendar.getInstance();
 			int seconds = calendar.get(Calendar.SECOND);
 			if (gameStartingValue == 0 && !countStarted) {
@@ -143,16 +156,16 @@ public class Server extends Thread {
 					gameStartingValue--;
 				}
 			}
-			if(gameStartingValue == 0) {
+			if (gameStartingValue == 0) {
 				this.startGame();
-				
+
 			}
 		}
 	}
 
 	private int getGameState(int port) {
 //		return panel.getState();
-		if (!mainPlayer.isReady() || !otherPlayer.isReady()) {
+		if (!mainPlayer.isReady() || !opponentPlayer.isReady()) {
 			// waiting
 			return 4;
 		}
@@ -162,8 +175,7 @@ public class Server extends Thread {
 			return 2;
 		} else if (panel.getState() == 7) {
 			return 7;
-		}
-		 else if (mainPlayer.isReady() && otherPlayer.isReady() && panel.getState() == 5) {
+		} else if (mainPlayer.isReady() && opponentPlayer.isReady() && panel.getState() == 5) {
 			// starting
 			return 5;
 		}
@@ -175,7 +187,7 @@ public class Server extends Thread {
 //		server.start();
 		loadElements();
 	}
-	
+
 	public int invertHorizontalBallValue(int x) {
 		int width = this.panel.width;
 		return width - x;
@@ -185,19 +197,20 @@ public class Server extends Thread {
 
 		int connectedPlayers = 0;
 		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
-		Paddle otherPlayer = new Paddle(Definitions.OTHER_PLAYER);
-		Panel panel = new Panel(mainPlayer, otherPlayer);
-		Ball ball = new Ball(panel, mainPlayer, otherPlayer);
-	
-		
-		try(ServerSocket server = new ServerSocket(4445)) {
+		Paddle opponentPlayer = new Paddle(Definitions.OTHER_PLAYER);
+		Panel panel = new Panel(mainPlayer, opponentPlayer);
+		Ball ball = new Ball(panel, mainPlayer, opponentPlayer);
+
+		ServerSocket serverParam = null;
+		try (ServerSocket server = new ServerSocket(4445)) {
+//		try (ServerSocket server = new ServerSocket(0)) {
 			System.out.println("server port: " + server.getLocalPort());
-			
-			while (!mainPlayer.isConnected() || !otherPlayer.isConnected()) {
+			serverParam = server;
+			while (!mainPlayer.isConnected() || !opponentPlayer.isConnected()) {
 				if (!mainPlayer.isConnected()) {
 					mainPlayer.connection = server.accept();
-				}else if (!otherPlayer.isConnected()) {
-					otherPlayer.connection = server.accept();
+				} else if (!opponentPlayer.isConnected()) {
+					opponentPlayer.connection = server.accept();
 				}
 			}
 		} catch (IOException e) {
@@ -205,22 +218,19 @@ public class Server extends Thread {
 			e.printStackTrace();
 		}
 
-		Server sendThread = new Server(ball, mainPlayer, otherPlayer, panel);
-		sendThread.start();
-
 		ReceiveServer mainThread = new ReceiveServer(mainPlayer, panel, new PlayerActionsHandler(mainPlayer, panel));
 		mainThread.start();
-		
-		ReceiveServer oppoThread = new ReceiveServer(otherPlayer, panel, new PlayerActionsHandler(otherPlayer, panel));
+
+		ReceiveServer oppoThread = new ReceiveServer(opponentPlayer, panel, new PlayerActionsHandler(opponentPlayer, panel));
 		oppoThread.start();
-
+		PlayerClosedConnectionCallback cb = new PlayerClosedConnectionCallback(panel);
+		Server sendThread = new Server(ball, mainPlayer, opponentPlayer, panel, cb, mainThread, oppoThread);
 		panel.addChildrenElement(mainPlayer);
-		panel.addChildrenElement(otherPlayer);
+		panel.addChildrenElement(opponentPlayer);
 		panel.addChildrenElement(ball);
-
+		sendThread.start();
 		GameThread gt = new GameThread(panel);
 		gt.start();
-		System.out.println("returned ");
 
 	}
 }

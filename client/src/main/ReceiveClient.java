@@ -1,4 +1,5 @@
 package main;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -37,7 +38,6 @@ public class ReceiveClient extends Thread implements Serializable {
 	@Override
 	public void run() {
 
-
 		try (DataInputStream in = new DataInputStream(this.mainPlayer.connection.getInputStream())) {
 			while (true) {
 				try {
@@ -54,6 +54,20 @@ public class ReceiveClient extends Thread implements Serializable {
 					break;
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
+				} catch (Exception e) {
+					if (this.mainPlayer.connection == null) {
+						while (true) {
+							try {
+								Thread.sleep(100);
+
+								if (this.mainPlayer.connection != null) {
+									break;
+								}
+							} catch (InterruptedException e1) {
+								e1.printStackTrace();
+							}
+						}
+					}
 				}
 
 			}
@@ -65,7 +79,7 @@ public class ReceiveClient extends Thread implements Serializable {
 		}
 
 	}
-	
+
 	public void setLocalValues(BallLocalizationValues values) {
 		this.ball.y = values.y;
 		this.ball.x = values.x;
@@ -78,7 +92,7 @@ public class ReceiveClient extends Thread implements Serializable {
 		panel.maxRounds = values.currentRound;
 		panel.maxScore = values.maxScore;
 	}
-	
+
 	private void handleGameState(BallLocalizationValues gameValues) {
 		if (gameValues.gameState == 4) {
 			this.panel.serverRespondedReady();

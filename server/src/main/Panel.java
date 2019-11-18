@@ -8,22 +8,22 @@ public class Panel {
 	final int width = 750, height = 400;
 	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting, 7 game ended by max score
 	private int state = 0;
-	private String playerPausedConnectionInstanceString = "";
+	private int playerType = 0;
 	private int maxRounds, maxScore, currentRound = 1;
 	
 	public int getState() {
 		return state;
 	}
 	
-	public void pauseGame(String playerConnectionPort) {
+	public void pauseGame(int playerType) {
 		this.setState(2);
-		playerPausedConnectionInstanceString = playerConnectionPort; 
+		this.playerType = playerType; 
 	}
 	
-	public void unPauseGame(String playerConnectionPort) {
-		if (playerConnectionPort == playerPausedConnectionInstanceString) {
+	public void unPauseGame(int playerType) {
+		if (state == 2 && this.playerType == playerType) {
 			setState(1);
-			playerPausedConnectionInstanceString = "";
+			this.playerType = 0;
 		}
 	}
 

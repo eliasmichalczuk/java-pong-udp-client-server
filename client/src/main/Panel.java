@@ -23,7 +23,7 @@ public class Panel extends JPanel{
 	final int width = 750, height = 400;
 	Rectangle bounds;
 	
-	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting, 7 ended by max score
+	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting, 7 ended by max score, 8 other player left, waiting for opponent
 	private int state = 0;
 	private int gameStartingValue = 0;
 	
@@ -114,6 +114,9 @@ public class Panel extends JPanel{
         		g.drawString("YOU LOSE", 350, 180);
         	}
         	g.drawString("X to restart", 350, 220);
+        } else if (state == 8) {
+    		g.drawString("Opponent disconnected. Waiting for another one.", 350, 120);
+        	g.drawString("Press L to leave game", 350, 220);
         }
 
         
@@ -139,8 +142,11 @@ public class Panel extends JPanel{
 	}
 	
 	public void leaveGame() {
+		if (state == 8) {
+			this.frameCallback.closeFrame();
+		}
 		if(mainPlayer.doesWantToQuit()) {
-			mainPlayer.setLeavingGame(true);
+			this.frameCallback.closeFrame();
 		} else if (!mainPlayer.doesWantToQuit()){
 			this.mainPlayer.setWantsToPause(true);	
 			this.mainPlayer.setWantToQuit(true);	
