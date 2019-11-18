@@ -183,54 +183,49 @@ public class Server extends Thread {
 	}
 
 	public static void main(String[] args) {
-//		Thread server = new Server();
-//		server.start();
-		loadElements();
+		
+		try (ServerSocket server = new ServerSocket(4445)) {
+			System.out.println("server port: " + server.getLocalPort());
+
+			while (true) {
+				Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
+				Paddle opponentPlayer = new Paddle(Definitions.OTHER_PLAYER);
+				while (!mainPlayer.isConnected() || !opponentPlayer.isConnected()) {
+					if (!mainPlayer.isConnected()) {
+						mainPlayer.connection = server.accept();
+					} else if (!opponentPlayer.isConnected()) {
+						opponentPlayer.connection = server.accept();
+					}
+					
+					if (mainPlayer.isConnected() && opponentPlayer.isConnected()) {
+						Panel panel = new Panel(mainPlayer, opponentPlayer);
+						Ball ball = new Ball(panel, mainPlayer, opponentPlayer);
+
+						ReceiveServer mainThread = new ReceiveServer(mainPlayer, panel, new PlayerActionsHandler(mainPlayer, panel));
+						mainThread.start();
+
+						ReceiveServer oppoThread = new ReceiveServer(opponentPlayer, panel, new PlayerActionsHandler(opponentPlayer, panel));
+						oppoThread.start();
+						PlayerClosedConnectionCallback cb = new PlayerClosedConnectionCallback(panel);
+						Server sendThread = new Server(ball, mainPlayer, opponentPlayer, panel, cb, mainThread, oppoThread);
+						panel.addChildrenElement(mainPlayer);
+						panel.addChildrenElement(opponentPlayer);
+						panel.addChildrenElement(ball);
+						sendThread.start();
+						GameThread gt = new GameThread(panel);
+						gt.start();
+					}
+				}
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public int invertHorizontalBallValue(int x) {
 		int width = this.panel.width;
 		return width - x;
-	}
-
-	public static void loadElements() {
-
-		int connectedPlayers = 0;
-		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
-		Paddle opponentPlayer = new Paddle(Definitions.OTHER_PLAYER);
-		Panel panel = new Panel(mainPlayer, opponentPlayer);
-		Ball ball = new Ball(panel, mainPlayer, opponentPlayer);
-
-		ServerSocket serverParam = null;
-		try (ServerSocket server = new ServerSocket(4445)) {
-//		try (ServerSocket server = new ServerSocket(0)) {
-			System.out.println("server port: " + server.getLocalPort());
-			serverParam = server;
-			while (!mainPlayer.isConnected() || !opponentPlayer.isConnected()) {
-				if (!mainPlayer.isConnected()) {
-					mainPlayer.connection = server.accept();
-				} else if (!opponentPlayer.isConnected()) {
-					opponentPlayer.connection = server.accept();
-				}
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		ReceiveServer mainThread = new ReceiveServer(mainPlayer, panel, new PlayerActionsHandler(mainPlayer, panel));
-		mainThread.start();
-
-		ReceiveServer oppoThread = new ReceiveServer(opponentPlayer, panel, new PlayerActionsHandler(opponentPlayer, panel));
-		oppoThread.start();
-		PlayerClosedConnectionCallback cb = new PlayerClosedConnectionCallback(panel);
-		Server sendThread = new Server(ball, mainPlayer, opponentPlayer, panel, cb, mainThread, oppoThread);
-		panel.addChildrenElement(mainPlayer);
-		panel.addChildrenElement(opponentPlayer);
-		panel.addChildrenElement(ball);
-		sendThread.start();
-		GameThread gt = new GameThread(panel);
-		gt.start();
-
 	}
 }
