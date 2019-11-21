@@ -21,6 +21,8 @@ public class GameThread extends Thread {
 	        	sleepTime = 10;
 	        } else if(panel.getState() == 2 || panel.getState() == 5) {
 	        	sleepTime = 10;
+	        } else {
+	        	sleepTime = 20;
 	        }
 			try {
 				Thread.sleep(sleepTime);

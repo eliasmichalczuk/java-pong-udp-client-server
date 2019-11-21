@@ -34,6 +34,7 @@ public class ReceiveServer extends Thread {
 	public void run() {
 		while (true) {
 			try (DataInputStream in = new DataInputStream(this.player.connection.getInputStream())) {
+				System.out.println(this.player.connection.toString());
 				while (true) {
 
 					try {
@@ -45,15 +46,15 @@ public class ReceiveServer extends Thread {
 							player.toString();
 							e.printStackTrace();
 
-							while (this.player.connection != null && !this.player.connection.isClosed()) {
-								try {
-									player.toString();
-									System.out.println("player not connected...");
-									Thread.sleep(200);
-								} catch (InterruptedException e1) {
-									e1.printStackTrace();
-								}
-							}
+//							while (this.player.connection != null && !this.player.connection.isClosed()) {
+//								try {
+//									player.toString();
+//									System.out.println("player not connected...");
+//									Thread.sleep(200);
+//								} catch (InterruptedException e1) {
+//									e1.printStackTrace();
+//								}
+//							}
 							break;
 						}
 
@@ -81,23 +82,25 @@ public class ReceiveServer extends Thread {
 						e.printStackTrace();
 					} catch (SocketException e) {
 						e.printStackTrace();
+						break;
 					} catch (ClassNotFoundException e) {
 						e.printStackTrace();
-					} catch (Exception e) {
-						while (!this.player.isConnected()) {
-							try {
-								System.out.println("player not connected...");
-								Thread.sleep(200);
-							} catch (InterruptedException e1) {
-								e1.printStackTrace();
-							}
-						}
+//					} catch (Exception e) {
+//						while (!this.player.isConnected()) {
+//							try {
+//								System.out.println("player not connected...");
+//								Thread.sleep(200);
+//							} catch (InterruptedException e1) {
+//								e1.printStackTrace();
+//							}
+//						}
 					}
 					Thread.yield();
 				}
-			} catch (IOException e) {
-				player.toString();
+			} catch (IOException | NullPointerException e) {
+				System.out.println(player.toString());
 				e.printStackTrace();
+				break;
 			}
 		}
 	}
