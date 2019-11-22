@@ -74,13 +74,14 @@ public class Paddle implements PanelElement {
 	}
 
 	final int width = 10, height = 100;
+	public String name;
 	
 	public Paddle(int player) {
 		if (player == Definitions.MAIN_PLAYER) {
 			this.playerType = Definitions.MAIN_PLAYER;
 			x = 10;
 		} else {
-			this.playerType = Definitions.OTHER_PLAYER;
+			this.playerType = Definitions.OPPONENT;
 			x = 720;
 		}
 		this.reset();
@@ -135,7 +136,7 @@ public class Paddle implements PanelElement {
 	
 	@Override
 	public String toString() {
-		return "Paddle [yVel=" + yVel + ", upAccel=" + upAccel + ", downAccel=" + downAccel + ", player=" + player
+		return "Paddle  [ NAME = " + name + "yVel=" + yVel + ", upAccel=" + upAccel + ", downAccel=" + downAccel + ", player=" + player
 				+ ", x=" + x + ", y=" + y + ", priorYValue=" + priorYValue + ", score=" + score + ", roundsWon="
 				+ roundsWon + ", playerType=" + playerType + ", ready=" + ready
 				+ ", width=" + width + ", height=" + height + "]";

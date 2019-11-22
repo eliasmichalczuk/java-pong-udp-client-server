@@ -8,9 +8,10 @@ public class PlayerResponse implements Serializable {
 	public final boolean ready, wantsToPause, leavingGame, wantsRestartAfterGameEndedByValue;
 	public final int maxRounds;
 	public final int maxScore;
+	public String name;
 	
 	public PlayerResponse(int playerY, boolean ready, int playerReceivePort, boolean wantsToPause,
-			boolean leavingGame, int maxRounds, int maxScore, boolean wantsRestartAfterGameEndedByValue) {
+			boolean leavingGame, int maxRounds, int maxScore, boolean wantsRestartAfterGameEndedByValue, String name) {
 		this.playerY = playerY;
 		this.ready = ready;
 		this.playerReceivePort = playerReceivePort;
@@ -19,5 +20,6 @@ public class PlayerResponse implements Serializable {
 		this.maxRounds = maxRounds;
 		this.maxScore = maxScore;
 		this.wantsRestartAfterGameEndedByValue = wantsRestartAfterGameEndedByValue;
+		this.name = name;
 	}
 }

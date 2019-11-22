@@ -97,8 +97,10 @@ public class Paddle extends Component implements PanelElement, Serializable {
 	}
 
 	final int width = 10, height = 100;
+	public String name;
 	
-	public Paddle(int player) {
+	public Paddle(int player, String name) {
+		this.name = name;
 		upAccel = false;
 		downAccel = false;
 		priorYValue = y = 120;

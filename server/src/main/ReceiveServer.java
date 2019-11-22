@@ -43,7 +43,6 @@ public class ReceiveServer extends Thread {
 							ObjectInputStream is = new ObjectInputStream(in);
 							playerResponseValues = (PlayerResponse) is.readObject();
 						} catch (SocketException | NullPointerException e) {
-							player.toString();
 							e.printStackTrace();
 
 //							while (this.player.connection != null && !this.player.connection.isClosed()) {
@@ -78,6 +77,7 @@ public class ReceiveServer extends Thread {
 						}
 
 						player.setY(playerResponseValues.playerY);
+						player.name = playerResponseValues.name;
 					} catch (RuntimeException e) {
 						e.printStackTrace();
 					} catch (SocketException e) {

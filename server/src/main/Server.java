@@ -12,6 +12,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -51,22 +52,18 @@ public class Server extends Thread {
 
 	private ReceiveServer mainThread;
 
-	private ReceiveServer oppoThread;
-
 	private ConnectionHandler connectionHandler;
 
 	private GameThread gt;
 	private int timesRan = 0;
 
-	public Server(Ball ball, Paddle mainPlayer, Paddle otherPlayer, Panel panel, ReceiveServer mainThread,
-			ReceiveServer oppoThread, ConnectionHandler connectionHandler) {
+	public Server(Ball ball, Paddle mainPlayer, Paddle opponentPlayer, Panel panel, ReceiveServer mainThread, ConnectionHandler connectionHandler) {
 		this.mainPlayer = mainPlayer;
-		this.opponentPlayer = otherPlayer;
 		this.ball = ball;
+		this.opponentPlayer = opponentPlayer;
 		this.panel = panel;
 		this.connectionHandler = connectionHandler;
 		this.mainThread = mainThread;
-		this.oppoThread = oppoThread;
 	}
 
 	private void startGame() {
@@ -79,25 +76,24 @@ public class Server extends Thread {
 	public void run() {
 
 		while (true) {
-			try (DataOutputStream outMain = new DataOutputStream(this.mainPlayer.connection.getOutputStream());
-					DataOutputStream outOpponnent = new DataOutputStream(
-							this.opponentPlayer.connection.getOutputStream())) {
-				while (!this.mainPlayer.connection.isClosed() && !this.opponentPlayer.connection.isClosed()) {
-
+			try (DataOutputStream outMain = new DataOutputStream(this.mainPlayer.connection.getOutputStream())) {
+				while (!this.mainPlayer.connection.isClosed()) {
 					gameStartCountdown();
 					Thread.sleep(20);
-
+					BallLocalizationValues mainPlayerValues = null;
 					try {
-						BallLocalizationValues mainPlayerValues = new BallLocalizationValues((int) ball.getX(), ball.y,
-								this.mainPlayer.getScore(), this.opponentPlayer.getScore(), Definitions.MAIN_PLAYER,
-								gameStartingValue, this.getGameState(0), opponentPlayer.getY(), panel.getMaxRounds(),
-								panel.getMaxScore(), mainPlayer.getRoundsWon(), opponentPlayer.getRoundsWon());
-
-						BallLocalizationValues otherPlayerValues = new BallLocalizationValues(
-								this.invertHorizontalBallValue(ball.getX()), ball.y, this.opponentPlayer.getScore(),
-								this.mainPlayer.getScore(), Definitions.OTHER_PLAYER, gameStartingValue,
-								this.getGameState(0), mainPlayer.getY(), panel.getMaxRounds(), panel.getMaxScore(),
-								opponentPlayer.getRoundsWon(), mainPlayer.getRoundsWon());
+						if (this.mainPlayer.getPlayerType() == Definitions.MAIN_PLAYER) {
+							mainPlayerValues = new BallLocalizationValues((int) ball.getX(), ball.y,
+									this.mainPlayer.getScore(), this.opponentPlayer.getScore(), Definitions.MAIN_PLAYER,
+									gameStartingValue, this.getGameState(0), opponentPlayer.getY(), panel.getMaxRounds(),
+									panel.getMaxScore(), mainPlayer.getRoundsWon(), opponentPlayer.getRoundsWon());
+						} else {
+							mainPlayerValues = new BallLocalizationValues(
+									this.invertHorizontalBallValue(ball.getX()), ball.y, this.opponentPlayer.getScore(),
+									this.mainPlayer.getScore(), Definitions.OPPONENT, gameStartingValue,
+									this.getGameState(0), mainPlayer.getY(), panel.getMaxRounds(), panel.getMaxScore(),
+									opponentPlayer.getRoundsWon(), mainPlayer.getRoundsWon());
+						}
 
 						try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 								ObjectOutputStream os = new ObjectOutputStream(outputStream)) {
@@ -106,40 +102,34 @@ public class Server extends Thread {
 							byte[] valuesByteFormat = outputStream.toByteArray();
 							outMain.write(valuesByteFormat);
 							outMain.flush();
-							outputStream.reset();
-
-							ObjectOutputStream ous = new ObjectOutputStream(outputStream);
-							ous.writeObject(otherPlayerValues);
-							valuesByteFormat = outputStream.toByteArray();
-
-							outOpponnent.write(valuesByteFormat);
-							outOpponnent.flush();
+//							outputStream.reset();
+//
+//							ObjectOutputStream ous = new ObjectOutputStream(outputStream);
+//							ous.writeObject(otherPlayerValues);
+//							valuesByteFormat = outputStream.toByteArray();
+//
+//							outOpponnent.write(valuesByteFormat);
+//							outOpponnent.flush();
 
 						} catch (NullPointerException | SocketException e) {
-							timesRan++;
-							if (timesRan > 1) {
-								System.out.println("Rodou mais de uma vez ");
-								break;
-							}
-							System.out.println("Player disconnected ");
 							e.printStackTrace();
 							PlayerClosedConnectionCallback cb = null;
 
 							if (this.mainPlayer.connection.isClosed()) {
-//								this.cb.waitForPlayerReconnect(this.mainPlayer, this.mainThread);
-								this.mainPlayer.connection.close();
 								cb = new PlayerClosedConnectionCallback(panel, mainPlayer, opponentPlayer, this,
-										connectionHandler);
-							} else {
-//								this.cb.waitForPlayerReconnect(this.opponentPlayer, this.oppoThread);
-								this.opponentPlayer.connection.close();
-								cb = new PlayerClosedConnectionCallback(panel, opponentPlayer, mainPlayer, this,
-										connectionHandler);
+										connectionHandler, this.ball);
+								System.out.println("Player disconnected, name " + this.mainPlayer.name);
+								new Thread(cb).run();
+								this.mainThread.interrupt();
 							}
-							this.mainThread.interrupt();
-							this.oppoThread.interrupt();
-							this.gt.interrupt();
-							new Thread(cb).run();
+//							else if (this.opponentPlayer.connection.isClosed()) {
+//								cb = new PlayerClosedConnectionCallback(panel, opponentPlayer, mainPlayer, this,
+//										connectionHandler, mainThread);
+//								System.out.println("Player disconnected, name " + this.opponentPlayer.name);
+//								this.oppoThread.interrupt();
+//							}
+//							this.gt.interrupt();
+//							new Thread(cb).run();
 							break;
 						}
 
@@ -148,9 +138,12 @@ public class Server extends Thread {
 					}
 				}
 			} catch (SocketException e) {
-				e.printStackTrace();
+				errors.log(Level.SEVERE, e.getMessage(), e);
+				System.out.println(this.mainPlayer.name + " disconnected this player");
+				break;
 			} catch (IOException | InterruptedException e) {
 				errors.log(Level.SEVERE, e.getMessage(), e);
+				break;
 			}
 		}
 	}
@@ -203,67 +196,57 @@ public class Server extends Thread {
 	public static void main(String[] args) {
 		ConnectionHandler connectionHandler = new ConnectionHandler();
 		// ServerSocket server = new ServerSocket(4445)
-		try {
-			ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
-
-			serverSocketChannel.socket().bind(new InetSocketAddress(4445));
-			serverSocketChannel.configureBlocking(false);
+		try (ServerSocket server = new ServerSocket(4445)) {
+			System.out.println("server port: " + server.getLocalPort());
+			
+			Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
+			Paddle opponent = new Paddle(Definitions.OPPONENT);
 			while (true) {
-				SocketChannel socketChannel = serverSocketChannel.accept();
-
-				if (socketChannel != null) {
-					Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
-					Paddle opponentPlayer = new Paddle(Definitions.OTHER_PLAYER);
-					while (!mainPlayer.isConnected() || !opponentPlayer.isConnected()) {
-						if (!connectionHandler.disconnectedPlayers.isEmpty()) {
-							connectionHandler.disconnectedPlayers.get(0).connection = socketChannel.socket();
-							System.out.println("accepted connection from new player ");
-							connectionHandler.disconnectedPlayers.remove(0);
-						}
-						if (!mainPlayer.isConnected()) {
-							mainPlayer.connection = socketChannel.socket();
-							System.out.println("Accepted connection mainP " + mainPlayer.toString());
-						} else if (!opponentPlayer.isConnected()) {
-							opponentPlayer.connection = socketChannel.socket();
-							System.out.println("Accepted connection opponent " + mainPlayer.toString());
-						}
-
-						if (mainPlayer.isConnected() && opponentPlayer.isConnected()) {
-							System.out.println("Accepted connection to new pair of players ");
-							Panel panel = new Panel(mainPlayer, opponentPlayer);
-							Ball ball = new Ball(panel, mainPlayer, opponentPlayer);
-
-							ReceiveServer mainThread = new ReceiveServer(mainPlayer, panel,
-									new PlayerActionsHandler(mainPlayer, panel));
-							mainThread.start();
-
-							ReceiveServer oppoThread = new ReceiveServer(opponentPlayer, panel,
-									new PlayerActionsHandler(opponentPlayer, panel));
-							oppoThread.start();
-
-							Server sendThread = new Server(ball, mainPlayer, opponentPlayer, panel, mainThread,
-									oppoThread, connectionHandler);
-							panel.addChildrenElement(mainPlayer);
-							panel.addChildrenElement(opponentPlayer);
-							panel.addChildrenElement(ball);
-							sendThread.start();
-							GameThread gt = new GameThread(panel);
-							gt.start();
-							sendThread.appendGameThread(gt);
-						}
+				
+				Socket newConnectionSocket = server.accept();
+				if (!mainPlayer.isConnected() || !opponent.isConnected()) {
+					if (!connectionHandler.disconnectedPlayers.isEmpty()) {
+						connectionHandler.disconnectedPlayers.get(0).connection = newConnectionSocket;
+						System.out.println("accepted connection from new player ");
+						connectionHandler.disconnectedPlayers.remove(0);
+					}
+					else if (!mainPlayer.isConnected()) {
+						mainPlayer.connection = newConnectionSocket;
+						System.out.println("Accepted connection mainP " + mainPlayer.toString());
+					} else if (!opponent.isConnected()) {
+						opponent.connection = newConnectionSocket;
+						System.out.println("Accepted connection opponent " + mainPlayer.toString());
 					}
 				}
 
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					System.out.println("..... ");
-					e.printStackTrace();
+				if (mainPlayer.isConnected() && opponent.isConnected()) {
+					System.out.println("Accepted connection to new pair of players ");
+					Panel panel = new Panel(mainPlayer, opponent);
+					Ball ball = new Ball(panel, mainPlayer, opponent);
+
+					ReceiveServer mainThread = new ReceiveServer(mainPlayer, panel,
+							new PlayerActionsHandler(mainPlayer, panel));
+					mainThread.start();
+
+					ReceiveServer oppoThread = new ReceiveServer(opponent, panel,
+							new PlayerActionsHandler(opponent, panel));
+					oppoThread.start();
+
+					Server sendThread = new Server(ball, mainPlayer, opponent,panel, mainThread, connectionHandler);
+					Server oppoSendThread = new Server(ball, opponent, mainPlayer,panel, oppoThread, connectionHandler);
+					panel.addChildrenElement(mainPlayer);
+					panel.addChildrenElement(opponent);
+					panel.addChildrenElement(ball);
+					sendThread.start();
+					oppoSendThread.start();
+					GameThread gt = new GameThread(panel);
+					gt.start();
+
+					mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
+					opponent = new Paddle(Definitions.OPPONENT);
 				}
 			}
-
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

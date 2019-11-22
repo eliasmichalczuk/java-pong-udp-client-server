@@ -71,7 +71,7 @@ public class Client extends Thread implements Serializable {
 							mainPlayer.getY(), mainPlayer.isReady(),
 							mainPlayer.getReceiveConnectionPort(),
 							mainPlayer.doesWantToPause(),
-							mainPlayer.isLeavingGame(), maxRounds, maxScore, mainPlayer.wantsRestartAfterGameEndedByValue);
+							mainPlayer.isLeavingGame(), maxRounds, maxScore, mainPlayer.wantsRestartAfterGameEndedByValue, mainPlayer.name);
 					os.writeObject(request);
 					byte[] obj = outputStream.toByteArray();
 
@@ -102,13 +102,14 @@ public class Client extends Thread implements Serializable {
 		
 		// Clien run with "SERVER_ADDRESS ROUNDS POINTS"
 		int maxRounds, maxScore, port;
-		String serverId;
+		String serverId, name;
 
 		try {
 			serverId = args[0];
 			port = Integer.parseInt(args[1]);
 			maxRounds = Integer.parseInt(args[2]);
 			maxScore = Integer.parseInt(args[3]);
+			name = args[4];
 			System.out.println(args[0]);
 			System.out.println(args[1]);
 			System.out.println(args[2]);
@@ -127,8 +128,8 @@ public class Client extends Thread implements Serializable {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		
-		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
-		Paddle otherPlayer = new Paddle(Definitions.OTHER_PLAYER);
+		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER, name);
+		Paddle otherPlayer = new Paddle(Definitions.OTHER_PLAYER, "");
 		Panel panel = new Panel(mainPlayer, otherPlayer, new FrameCallback(frame));
 		Ball ball = new Ball(panel, mainPlayer, otherPlayer);
 		Model model = new Model(mainPlayer, otherPlayer, panel, frame, ball);
