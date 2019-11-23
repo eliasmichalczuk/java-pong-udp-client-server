@@ -27,6 +27,10 @@ public class Paddle implements PanelElement {
 	public void setReady() {
 		this.ready = true;
 	}
+	
+	public void notReady() {
+		this.ready = false;
+	}
 
 	public boolean isConnected() {
 		return this.connection != null && !this.connection.isClosed();
@@ -147,6 +151,7 @@ public class Paddle implements PanelElement {
 		this.score = 0;
 		upAccel = false;
 		downAccel = false;
+		this.ready = false;
 		priorYValue = y = 120;
 		yVel = 0;
 	}

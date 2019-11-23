@@ -220,5 +220,9 @@ public class Paddle extends Component implements PanelElement, Serializable {
 	public void setRoundsWon(int roundsWon) {
 		this.roundsWon = roundsWon;
 	}
+
+	public void setNotReady() {
+		this.ready = false;
+	}
 	
 }

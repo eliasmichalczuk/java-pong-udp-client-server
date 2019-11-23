@@ -13,3 +13,7 @@ The game is currently not ready to actually have fun with it.
 ### Prerequisites
 
 Have ready Java 7+.
+
+Executando server
+INSIDE -> /java-pong-udp-client-server/server/bin; THEN RUN -> $ java -cp ./ main.Server
+

@@ -6,7 +6,7 @@ import java.util.List;
 public class Panel {
 	
 	final int width = 750, height = 400;
-	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting, 7 game ended by max score
+	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting, 7 game ended by max score, 8 opponent left
 	private int state = 0;
 	private int playerType = 0;
 	private int maxRounds, maxScore, currentRound = 1;
@@ -97,6 +97,13 @@ public class Panel {
 		otherPlayer.reset();
 		currentRound = 1;
 		state = Definitions.STATE_STARTING_GAME;
+	}
+	
+	public void setZeroState() {
+		mainPlayer.reset();
+		otherPlayer.reset();
+		currentRound = 1;
+		state = 0;
 	}
 
 }

@@ -101,8 +101,7 @@ public class Panel extends JPanel{
             	g.drawString("Do you really want to quit the game?", 180, 200);
             	g.drawString("L to leave, P to return", 285, 220);
             } else if (!mainPlayer.doesWantToPause()) {
-            	g.drawString("Your rival needs a break from losing", 180, 200);
-            	g.drawString("Game is paused", 285, 220);
+            	g.drawString("Opponent paused the game", 180, 200);
             }
         }
         else if (state == 7) {
@@ -115,7 +114,7 @@ public class Panel extends JPanel{
         	}
         	g.drawString("X to restart", 350, 220);
         } else if (state == 8) {
-    		g.drawString("Opponent disconnected. Waiting for another one.", 350, 120);
+    		g.drawString("Opponent disconnected. Waiting for another one.", 150, 120);
         	g.drawString("Press L to leave game", 350, 220);
         }
 
@@ -128,8 +127,6 @@ public class Panel extends JPanel{
 	}
 
 	public void startGame() {
-		if (enterPressed) return;
-		this.enterPressed = true;
 		this.mainPlayer.setReady();
 	}
 	
@@ -144,6 +141,7 @@ public class Panel extends JPanel{
 	public void leaveGame() {
 		if (state == 8) {
 			this.frameCallback.closeFrame();
+			return;
 		}
 		if(mainPlayer.doesWantToQuit()) {
 			this.frameCallback.closeFrame();

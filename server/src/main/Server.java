@@ -77,11 +77,18 @@ public class Server extends Thread {
 
 		while (true) {
 			try (DataOutputStream outMain = new DataOutputStream(this.mainPlayer.connection.getOutputStream())) {
-				while (!this.mainPlayer.connection.isClosed()) {
+				this.panel.setZeroState();
+				while (this.mainPlayer.isConnected()) {
 					gameStartCountdown();
 					Thread.sleep(20);
 					BallLocalizationValues mainPlayerValues = null;
 					try {
+						
+						if (!this.opponentPlayer.isConnected()) {
+							this.panel.setState(8);
+							this.mainPlayer.notReady();
+						}
+						
 						if (this.mainPlayer.getPlayerType() == Definitions.MAIN_PLAYER) {
 							mainPlayerValues = new BallLocalizationValues((int) ball.getX(), ball.y,
 									this.mainPlayer.getScore(), this.opponentPlayer.getScore(), Definitions.MAIN_PLAYER,
@@ -176,7 +183,9 @@ public class Server extends Thread {
 
 	private int getGameState(int port) {
 //		return panel.getState();
-		if (!mainPlayer.isReady() || !opponentPlayer.isReady()) {
+		if (panel.getState() == 8) {
+			return 8;
+		} else if (!mainPlayer.isReady() || !opponentPlayer.isReady()) {
 			// waiting
 			return 4;
 		}
