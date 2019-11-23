@@ -12,6 +12,8 @@ public class Paddle implements PanelElement {
 	public Socket connection;
 	private int playerType = Definitions.DEFAULT_PLAYER;
 	private boolean ready = false;
+	public int udpSendPort;
+	public UdpSender udpSender;
 
 	public int getPlayerType() {
 		return playerType;

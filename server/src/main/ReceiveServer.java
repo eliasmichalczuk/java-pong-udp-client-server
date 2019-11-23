@@ -44,7 +44,8 @@ public class ReceiveServer extends Thread {
 							playerResponseValues = (PlayerResponse) is.readObject();
 						} catch (SocketException | NullPointerException e) {
 							e.printStackTrace();
-
+							System.out.println("receiving port for player: " + playerResponseValues.udpReceivePort);
+							this.player.udpSendPort = playerResponseValues.udpReceivePort;
 //							while (this.player.connection != null && !this.player.connection.isClosed()) {
 //								try {
 //									player.toString();

@@ -20,6 +20,8 @@ public class Paddle extends Component implements PanelElement, Serializable {
 	private int sendConnectionPort = Definitions.DEFAULT_PORT_SEND;
 	private int receiveConnectionPort = Definitions.DEFAULT_PORT_RECEIVE;
 	public Socket connection;
+	public Thread udpReceive;
+	public int udpReceivePort;
 	
 	public int getReceiveConnectionPort() {
 		return receiveConnectionPort;

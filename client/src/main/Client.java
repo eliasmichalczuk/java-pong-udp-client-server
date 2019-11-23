@@ -58,12 +58,12 @@ public class Client extends Thread implements Serializable {
 							&& !mainPlayer.isLeavingGame()) {
 					}
 					
-					while (mainPlayer.getReceiveConnectionPort() == 0) {
-						Client.sleep(20);
-					}
+//					while (mainPlayer.getReceiveConnectionPort() == 0) {
+//						Client.sleep(20);
+//					}
 					
 					if (!mainPlayer.isReady()) {
-						Client.sleep(20);
+						Client.sleep(100);
 					}
 			
 					os = new ObjectOutputStream(outputStream);
@@ -71,7 +71,9 @@ public class Client extends Thread implements Serializable {
 							mainPlayer.getY(), mainPlayer.isReady(),
 							mainPlayer.getReceiveConnectionPort(),
 							mainPlayer.doesWantToPause(),
-							mainPlayer.isLeavingGame(), maxRounds, maxScore, mainPlayer.wantsRestartAfterGameEndedByValue, mainPlayer.name);
+							mainPlayer.isLeavingGame(), maxRounds, maxScore,
+							mainPlayer.wantsRestartAfterGameEndedByValue,
+							mainPlayer.name, this.mainPlayer.udpReceivePort);
 					os.writeObject(request);
 					byte[] obj = outputStream.toByteArray();
 
@@ -149,8 +151,9 @@ public class Client extends Thread implements Serializable {
 			gt.start();
 			Client sendThread = new Client(mainPlayer, otherPlayer, ball, panel, maxRounds, maxScore);
 			sendThread.start();
-			ReceiveClient receiveThread = new ReceiveClient(mainPlayer, otherPlayer, ball, panel);
-			receiveThread.start();
+//			ReceiveClient receiveThread = new ReceiveClient(mainPlayer, otherPlayer, ball, panel);
+			mainPlayer.udpReceive = new UdpReceiver(mainPlayer, otherPlayer, ball, panel);
+			mainPlayer.udpReceive.start();
 		} catch (UnknownHostException e) {
 			System.out.println("Erro ao conectar");
 			e.printStackTrace();
