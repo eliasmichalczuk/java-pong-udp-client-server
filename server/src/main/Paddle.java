@@ -1,6 +1,8 @@
 package main;
 
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.UUID;
 
 public class Paddle implements PanelElement {
@@ -14,6 +16,7 @@ public class Paddle implements PanelElement {
 	private boolean ready = false;
 	public int udpSendPort;
 	public UdpSender udpSender;
+	public boolean connectionBeingHandled;
 
 	public int getPlayerType() {
 		return playerType;
@@ -21,6 +24,14 @@ public class Paddle implements PanelElement {
 
 	public void setPlayerType(int playerType) {
 		this.playerType = playerType;
+	}
+	
+	public InetAddress getInetAddress() {
+		if (this.connection != null && !this.connection.isClosed()) {
+			return this.connection.getInetAddress();
+		} else {
+			return InetAddress.getLoopbackAddress();
+		}
 	}
 
 	public boolean isReady() {
@@ -36,10 +47,13 @@ public class Paddle implements PanelElement {
 	}
 
 	public boolean isConnected() {
-		return this.connection != null && !this.connection.isClosed();
+		return (this.connection != null && !this.connection.isClosed()) || this.connectionBeingHandled;
 	}
 
-
+	public boolean connectionExists() {
+		return this.connection != null && !this.connection.isClosed();
+	}
+	
 	public double getyVel() {
 		return yVel;
 	}

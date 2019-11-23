@@ -18,9 +18,6 @@ public class UdpReceiver extends Thread {
 	private Paddle opponent;
 	private Ball ball;
 	private Panel panel;
-
-	private final String hostName = "localhost";
-	private InetAddress address;
 	private DatagramPacket responsePacket;
 
 	public UdpReceiver(Paddle mainPlayer, Paddle opponent, Ball ball, Panel panel) {
@@ -33,15 +30,9 @@ public class UdpReceiver extends Thread {
 	@Override
 	public void run() {
 		while (true) {
-			try {
-				this.address = InetAddress.getByName(hostName);
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			}
 
 			try (DatagramSocket socket = new DatagramSocket()) {
 				System.out.println("player receive socket started in getLocalPort: " + socket.getLocalPort());
-				System.out.println("player receive socket started in getPort: " + socket.getPort());
 				this.mainPlayer.udpReceivePort = socket.getLocalPort();
 				while (true) {
 					responsePacket = new DatagramPacket(new byte[576], 576);
@@ -51,7 +42,6 @@ public class UdpReceiver extends Thread {
 						ObjectInputStream is = new ObjectInputStream(in);
 						BallLocalizationValues gameValues = (BallLocalizationValues) is.readObject();
 
-						System.out.println("client receiving values ");
 						this.handleGameState(gameValues);
 						this.setLocalValues(gameValues);
 						mainPlayer.setTimeLastReceivedValue(Calendar.getInstance());

@@ -145,7 +145,7 @@ public class Client extends Thread implements Serializable {
 		Socket client;
 		try {
 			client = new Socket(serverId, port);
-			System.out.println("port : " + client.getLocalPort());
+			System.out.println("port tcp: " + client.getLocalPort());
 			mainPlayer.connection = client;
 			GameThread gt = new GameThread(panel);
 			gt.start();

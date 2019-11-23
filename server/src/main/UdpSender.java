@@ -21,21 +21,24 @@ public class UdpSender extends Thread {
 	private int calendarSeconds;
 	private Calendar calendar;
 	private boolean countStarted = false;
-	String hostName = "localhost";
-	private InetAddress address;
 	private Ball ball;
 	private Paddle mainPlayer;
-	private Paddle opponentPlayer;
+	private Paddle opponent;
 	private Panel panel;
-	private ReceiveServer mainThread;
 	private ConnectionHandler connectionHandler;
 	public int udpSendPort;
+	private ReceiveServer oppoReceiveThread;
+	private ReceiveServer mainReceiveThread;
 
-	public UdpSender(Ball ball, Paddle mainPlayer, Paddle opponentPlayer, Panel panel) {
+	public UdpSender(Ball ball, Paddle mainPlayer, Paddle opponent, Panel panel, ReceiveServer mainReceiveThread,
+			ReceiveServer oppoReceiveThread, ConnectionHandler handler) {
 		this.ball = ball;
 		this.mainPlayer = mainPlayer;
-		this.opponentPlayer = opponentPlayer;
+		this.opponent = opponent;
 		this.panel = panel;
+		this.mainReceiveThread = mainReceiveThread;
+		this.oppoReceiveThread = oppoReceiveThread;
+		connectionHandler = handler;
 	}
 
 	private void startGame() {
@@ -47,58 +50,51 @@ public class UdpSender extends Thread {
 	@Override
 	public void run() {
 		while (true) {
-			try {
-				address = InetAddress.getByName(hostName);
-			} catch (UnknownHostException e1) {
-				e1.printStackTrace();
-			}
 			try (DatagramSocket socket = new DatagramSocket()) {
 				while (true) {
 
 					gameStartCountdown();
 					Thread.sleep(33);
-					
-					while (this.mainPlayer.udpSendPort == 0 || this.opponentPlayer.udpSendPort == 0) {
-						 try {
-							 Thread.sleep(1000);
-						 } catch (Exception e) {
-							 System.out.println("sleep waiting for port error ");
-							 e.printStackTrace();
-						 }
+
+					handleConnections();
+
+					while (this.mainPlayer.udpSendPort == 0 || this.opponent.udpSendPort == 0) {
+						try {
+							Thread.sleep(1000);
+						} catch (Exception e) {
+							System.out.println("sleep waiting for port error ");
+							e.printStackTrace();
+						}
 					}
 
 					try {
 						BallLocalizationValues mainPlayerValues = new BallLocalizationValues((int) ball.getX(), ball.y,
-								this.mainPlayer.getScore(), this.opponentPlayer.getScore(), Definitions.MAIN_PLAYER,
-								gameStartingValue, this.getGameState(0), opponentPlayer.getY(), panel.getMaxRounds(),
-								panel.getMaxScore(), mainPlayer.getRoundsWon(), opponentPlayer.getRoundsWon());
+								this.mainPlayer.getScore(), this.opponent.getScore(), Definitions.MAIN_PLAYER,
+								gameStartingValue, this.getGameState(0), opponent.getY(), panel.getMaxRounds(),
+								panel.getMaxScore(), mainPlayer.getRoundsWon(), opponent.getRoundsWon());
 
 						BallLocalizationValues otherPlayerValues = new BallLocalizationValues(
-								this.invertHorizontalBallValue(ball.getX()), ball.y, this.opponentPlayer.getScore(),
+								this.invertHorizontalBallValue(ball.getX()), ball.y, this.opponent.getScore(),
 								this.mainPlayer.getScore(), Definitions.OPPONENT, gameStartingValue,
 								this.getGameState(0), mainPlayer.getY(), panel.getMaxRounds(), panel.getMaxScore(),
-								opponentPlayer.getRoundsWon(), mainPlayer.getRoundsWon());
+								opponent.getRoundsWon(), mainPlayer.getRoundsWon());
 
 						try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 								ObjectOutputStream os = new ObjectOutputStream(outputStream)) {
 							os.writeObject(mainPlayerValues);
 
 							byte[] valuesByteFormat = outputStream.toByteArray();
-							System.out.println("main "+ this.mainPlayer.udpSendPort);
-							System.out.println("oppo "+ this.opponentPlayer.udpSendPort);
 							DatagramPacket mainPlayerPacket = new DatagramPacket(valuesByteFormat,
-									valuesByteFormat.length, this.mainPlayer.connection.getInetAddress(),
+									valuesByteFormat.length, this.mainPlayer.getInetAddress(),
 									this.mainPlayer.udpSendPort);
 							socket.send(mainPlayerPacket);
 
-							
 							outputStream.reset();
 							ObjectOutputStream ous = new ObjectOutputStream(outputStream);
 							ous.writeObject(otherPlayerValues);
 							valuesByteFormat = outputStream.toByteArray();
 							DatagramPacket otherPlayerPacket = new DatagramPacket(valuesByteFormat,
-									valuesByteFormat.length, this.opponentPlayer.connection.getInetAddress(),
-									this.opponentPlayer.udpSendPort);
+									valuesByteFormat.length, this.opponent.getInetAddress(), this.opponent.udpSendPort);
 							socket.send(otherPlayerPacket);
 						} catch (SocketException e) {
 							e.printStackTrace();
@@ -108,13 +104,39 @@ public class UdpSender extends Thread {
 						e.printStackTrace();
 					}
 				}
+
 			} catch (IOException | InterruptedException e) {
 
 				errors.log(Level.SEVERE, e.getMessage(), e);
 			}
-			if (!mainPlayer.isConnected() && !opponentPlayer.isConnected()) {
+			if (!mainPlayer.isConnected() && !opponent.isConnected()) {
 				break;
 			}
+		}
+	}
+
+	private void handleConnections() {
+		if (!this.mainPlayer.connectionExists() && !this.opponent.connectionExists()) {
+			throw new RuntimeException("Both players: " + this.mainPlayer.name + " and " + this.opponent.name + " left the game");
+		}
+		if (!this.mainPlayer.isConnected()) {
+			this.mainPlayer.connectionBeingHandled = true;
+			UdpConnectionCallback cb = new UdpConnectionCallback(panel, mainPlayer, opponent, connectionHandler,
+					this.ball);
+			System.out.println("Player disconnected, name " + this.mainPlayer.name);
+			new Thread(cb).start();
+			this.mainReceiveThread.interrupt();
+			this.panel.setState(8);
+			this.opponent.notReady();
+		} else if (!this.opponent.isConnected()) {
+			this.opponent.connectionBeingHandled = true;
+			UdpConnectionCallback cb = new UdpConnectionCallback(panel, opponent, mainPlayer, connectionHandler,
+					this.ball);
+			System.out.println("Player disconnected, name " + this.opponent.name);
+			new Thread(cb).start();
+			this.oppoReceiveThread.interrupt();
+			this.panel.setState(8);
+			this.mainPlayer.notReady();
 		}
 	}
 
@@ -122,8 +144,7 @@ public class UdpSender extends Thread {
 		if (panel.getState() == 1) {
 			return;
 		}
-		if (mainPlayer.isReady() && opponentPlayer.isReady() && this.panel.getState() == 0
-				|| this.panel.getState() == 5) {
+		if (mainPlayer.isReady() && opponent.isReady() && this.panel.getState() == 0 || this.panel.getState() == 5) {
 			this.calendar = Calendar.getInstance();
 			int seconds = calendar.get(Calendar.SECOND);
 			if (gameStartingValue == 0 && !countStarted) {
@@ -145,10 +166,9 @@ public class UdpSender extends Thread {
 	}
 
 	private int getGameState(int port) {
-//	return panel.getState();
 		if (panel.getState() == 8) {
 			return 8;
-		} else if (!mainPlayer.isReady() || !opponentPlayer.isReady()) {
+		} else if (!mainPlayer.isReady() || !opponent.isReady()) {
 			// waiting
 			return 4;
 		}
@@ -158,7 +178,7 @@ public class UdpSender extends Thread {
 			return 2;
 		} else if (panel.getState() == 7) {
 			return 7;
-		} else if (mainPlayer.isReady() && opponentPlayer.isReady() && panel.getState() == 5) {
+		} else if (mainPlayer.isReady() && opponent.isReady() && panel.getState() == 5) {
 			// starting
 			return 5;
 		}

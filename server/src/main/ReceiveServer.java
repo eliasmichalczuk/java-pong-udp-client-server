@@ -35,6 +35,7 @@ public class ReceiveServer extends Thread {
 		while (true) {
 			try (DataInputStream in = new DataInputStream(this.player.connection.getInputStream())) {
 				System.out.println(this.player.connection.toString());
+				this.panel.setZeroState();
 				while (true) {
 
 					try {
@@ -44,8 +45,7 @@ public class ReceiveServer extends Thread {
 							playerResponseValues = (PlayerResponse) is.readObject();
 						} catch (SocketException | NullPointerException e) {
 							e.printStackTrace();
-							System.out.println("receiving port for player: " + playerResponseValues.udpReceivePort);
-							this.player.udpSendPort = playerResponseValues.udpReceivePort;
+							
 //							while (this.player.connection != null && !this.player.connection.isClosed()) {
 //								try {
 //									player.toString();
@@ -57,7 +57,7 @@ public class ReceiveServer extends Thread {
 //							}
 							break;
 						}
-
+						this.player.udpSendPort = playerResponseValues.udpReceivePort;
 						if (panel.getMaxRounds() == 0) {
 							panel.setMaxRounds(playerResponseValues.maxRounds);
 							panel.setMaxScore(playerResponseValues.maxScore);

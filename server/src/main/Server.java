@@ -123,8 +123,8 @@ public class Server extends Thread {
 							PlayerClosedConnectionCallback cb = null;
 
 							if (this.mainPlayer.connection.isClosed()) {
-								cb = new PlayerClosedConnectionCallback(panel, mainPlayer, opponentPlayer, this,
-										connectionHandler, this.ball);
+//								cb = new PlayerClosedConnectionCallback(panel, mainPlayer, opponentPlayer, this,
+//										connectionHandler, this.ball);
 								System.out.println("Player disconnected, name " + this.mainPlayer.name);
 								new Thread(cb).start();
 								this.mainThread.interrupt();
@@ -242,7 +242,7 @@ public class Server extends Thread {
 					oppoThread.start();
 
 					Server sendThread = new Server(ball, mainPlayer, opponent,panel, mainThread, connectionHandler);
-					UdpSender udpSenderMain = new UdpSender(ball, mainPlayer, opponent,panel);
+					UdpSender udpSenderMain = new UdpSender(ball, mainPlayer, opponent,panel, mainThread, oppoThread, connectionHandler);
 					Server oppoSendThread = new Server(ball, opponent, mainPlayer,panel, oppoThread, connectionHandler);
 					panel.addChildrenElement(mainPlayer);
 					panel.addChildrenElement(opponent);
