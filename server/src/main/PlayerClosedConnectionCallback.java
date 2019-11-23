@@ -24,7 +24,7 @@ public class PlayerClosedConnectionCallback implements Runnable {
 	}
 
 	@Override
-	public void run() {
+	public void run() throws RuntimeException {
 		disconnectedPlayer.connection = null;
 		thread.interrupt();
 		connectedPlayer.reset();
@@ -33,6 +33,10 @@ public class PlayerClosedConnectionCallback implements Runnable {
 		this.connectionHandler.disconnectedPlayers.add(disconnectedPlayer);
 
 		while (disconnectedPlayer.connection == null || !disconnectedPlayer.isConnected()) {
+			if (!connectedPlayer.isConnected()) {
+				this.connectionHandler.disconnectedPlayers.remove(connectedPlayer);
+				throw new RuntimeException("Other player not connected anymore. Goodbye. ");
+			}
 			try {
 				Thread.sleep(300);
 			} catch (InterruptedException e) {

@@ -1,6 +1,7 @@
 package main;
 
 import java.net.Socket;
+import java.util.UUID;
 
 public class Paddle implements PanelElement {
 
@@ -79,7 +80,12 @@ public class Paddle implements PanelElement {
 
 	final int width = 10, height = 100;
 	public String name;
+	private UUID uuid;
 	
+	public UUID getUuid() {
+		return uuid;
+	}
+
 	public Paddle(int player) {
 		if (player == Definitions.MAIN_PLAYER) {
 			this.playerType = Definitions.MAIN_PLAYER;
@@ -89,6 +95,32 @@ public class Paddle implements PanelElement {
 			x = 720;
 		}
 		this.reset();
+		this.uuid = UUID.randomUUID();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Paddle other = (Paddle) obj;
+		if (uuid == null) {
+			if (other.uuid != null)
+				return false;
+		} else if (!uuid.equals(other.uuid))
+			return false;
+		return true;
 	}
 
 	public void move() {
