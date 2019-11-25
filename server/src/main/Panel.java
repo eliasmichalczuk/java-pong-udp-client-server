@@ -10,6 +10,8 @@ public class Panel {
 	final int width = 750, height = 400;
 	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player,
 	// 5 starting, 7 game ended by max score, 8 opponent left, 9 changing game config
+	// 10 view leaderboards
+	
 	private int state = 0;
 	private int playerType = 0;
 	private int maxRounds, maxScore, currentRound = 1;
@@ -20,6 +22,11 @@ public class Panel {
 	public int otherPlayerNewGameConfig; // 2 confirmed, 3 refused, 4 restarting server config
 	public boolean changedGameConfig;
 	
+
+	private LeaderboardStorage storage;
+
+	public LeaderboardServer storageServer;
+	
 	public int getState() {
 		return state;
 	}
@@ -28,6 +35,7 @@ public class Panel {
 		this.setState(option);
 		this.playerType = playerType; 
 	}
+	
 	
 	public void unPauseGame(int playerType) {
 		if (state == 2 && this.playerType == playerType) {
@@ -40,9 +48,11 @@ public class Panel {
 		this.state = state;
 	}
 	
-	public Panel(Paddle mainPlayer, Paddle otherPlayer) {
+	public Panel(Paddle mainPlayer, Paddle otherPlayer, LeaderboardStorage storage, LeaderboardServer storageServer) {
 		this.mainPlayer = mainPlayer;
 		this.otherPlayer = otherPlayer;
+		this.storage = storage;
+		this.storageServer = storageServer;
 	}
 	
 	public void addChildrenElement(PanelElement child) {
@@ -75,7 +85,7 @@ public class Panel {
 		return currentRound;
 	}
 
-	public void setCurrentRound(Paddle player, Ball ball) {
+	public synchronized void setCurrentRound(Paddle player, Ball ball) {
 		if (currentRound == maxRounds) {
 			state = 7;
 			player.increseRoundsWon();
@@ -88,7 +98,8 @@ public class Panel {
 		}
 	}
 
-	public void playerScored(Paddle player, Ball ball) {
+	public synchronized void playerScored(Paddle player, Ball ball) {
+		this.storage.addPointsToPaddle(player);
 		if (1 + player.getScore() == maxScore) {
 			setCurrentRound(player, ball);
 		} else {
@@ -115,21 +126,21 @@ public class Panel {
 		newMaxScore = 0;
 	}
 
-	public void unPauseGameNewGameConfig(PlayerResponse playerResponseValues, Paddle player) {
+	public synchronized void unPauseGameNewGameConfig(PlayerResponse playerResponseValues, Paddle player) {
 		if (state == 9 && this.playerType == player.getPlayerType()) {
 			setState(5);
 			this.playerType = 0;
 		}
 	}
 
-	public void resetGameAfterNewGameState(PlayerResponse playerResponseValues, Paddle player) {
+	public synchronized void resetGameAfterNewGameState(PlayerResponse playerResponseValues, Paddle player) {
 		this.playerType = 0;
 		this.setState(5);
 		this.otherPlayerNewGameConfig = 4;
 		this.changedGameConfig = true;
 	}
 	
-	public void setPlayersReady() {
+	public synchronized void setPlayersReady() {
 		this.mainPlayer.setReady();
 		this.otherPlayer.setReady();
 	}

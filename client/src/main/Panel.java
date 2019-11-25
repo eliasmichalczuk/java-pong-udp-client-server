@@ -28,6 +28,8 @@ public class Panel extends JPanel{
 	
 	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player,
 	// 5 starting, 7 ended by max score, 8 other player left, waiting for opponent
+	// 10 view leaderboards
+	
 	private int state = 0;
 	private int gameStartingValue = 0;
 	
@@ -49,6 +51,8 @@ public class Panel extends JPanel{
 	private JTextField textfield;
 	public int newMaxRound, newMaxScore;
 	public int cacheNewMaxRound, cacheNewMaxScore;
+	private String serverId;
+	public int storagePort;
 	
 	public Panel(Paddle mainPlayer, Paddle otherPlayer, FrameCallback frameCallback) {
 		this.mainPlayer = mainPlayer;
@@ -200,6 +204,16 @@ public class Panel extends JPanel{
 		this.newMaxRound = 0;
 		this.newMaxScore = 0;
 		this.mainPlayer.insertingNewConfig = true;
+	}
+
+	public void showLeaderBoards() {
+		this.mainPlayer.wantsLeaderBoard = true;
+		System.out.println(serverId + " " + this.storagePort);
+		new LeaderboardConnection(this, mainPlayer, serverId, this.storagePort).start();
+	}
+
+	public void setServerId(String serverId) {
+		this.serverId = serverId;
 	}
 
 }

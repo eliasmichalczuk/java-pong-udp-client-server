@@ -10,12 +10,13 @@ public class PlayerResponse implements Serializable {
 	public final String name;
 	public final int udpReceivePort, opponentConfirmedNewGameConfig;
 	public final boolean insertingNewGameConfig;
+	private String password;
 	
 	public PlayerResponse(int playerY, boolean ready, int playerReceivePort, boolean wantsToPause,
 			boolean leavingGame, int maxRounds, int maxScore,
 			boolean wantsRestartAfterGameEndedByValue, String name,
 			int udpReceivePort, boolean insertingNewGameConfig, int newMaxScore, int newMaxRound,
-			int opponentConfirmedNewGameConfig) {
+			int opponentConfirmedNewGameConfig, String password) {
 		this.playerY = playerY;
 		this.ready = ready;
 		this.playerReceivePort = playerReceivePort;
@@ -30,5 +31,6 @@ public class PlayerResponse implements Serializable {
 		this.newMaxRound = newMaxRound;
 		this.newMaxScore = newMaxScore;
 		this.opponentConfirmedNewGameConfig = opponentConfirmedNewGameConfig;
+		this.password = password;
 	}
 }

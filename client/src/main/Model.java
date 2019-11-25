@@ -82,6 +82,10 @@ public class Model implements KeyListener, ActionListener  {
 			mainPlayer.refuseNewGameConfig();
 		}
 		
+		if (e.getKeyCode() == KeyEvent.VK_O) {
+			panel.showLeaderBoards();
+		}
+		
 		if (e.getKeyCode() == KeyEvent.VK_X && this.panel.getState() == 7) {
 			panel.restartGameAfterEndByScore();
 		}

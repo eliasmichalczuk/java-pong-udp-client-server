@@ -17,6 +17,7 @@ public class Paddle implements PanelElement {
 	public int udpSendPort;
 	public UdpSender udpSender;
 	public boolean connectionBeingHandled;
+	public String password;
 
 	public int getPlayerType() {
 		return playerType;
@@ -208,7 +209,7 @@ public class Paddle implements PanelElement {
 		return roundsWon;
 	}
 	
-	public void increseRoundsWon() {
+	public synchronized void increseRoundsWon() {
 		++roundsWon;
 	}
 }

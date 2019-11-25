@@ -80,7 +80,8 @@ public class Client extends Thread implements Serializable {
 							mainPlayer.name, this.mainPlayer.udpReceivePort,
 							this.mainPlayer.insertingNewConfig,
 							this.panel.newMaxRound, this.panel.newMaxScore,
-							this.mainPlayer.confirmNewGameConfig);
+							this.mainPlayer.confirmNewGameConfig,
+							this.mainPlayer.password);
 					os.writeObject(request);
 					byte[] obj = outputStream.toByteArray();
 
@@ -112,7 +113,7 @@ public class Client extends Thread implements Serializable {
 		
 		// Clien run with "SERVER_ADDRESS ROUNDS POINTS"
 		int maxRounds, maxScore, port;
-		String serverId, name;
+		String serverId, name, password;
 
 		try {
 			serverId = args[0];
@@ -120,12 +121,20 @@ public class Client extends Thread implements Serializable {
 			maxRounds = Integer.parseInt(args[2]);
 			maxScore = Integer.parseInt(args[3]);
 			name = args[4];
+			password = args[5];
 			System.out.println(args[0]);
 			System.out.println(args[1]);
 			System.out.println(args[2]);
 			System.out.println(args[3]);
 		} catch (Exception ex) {
-			throw new RuntimeException("Uso: SERVER_ADDRESS PORT ROUNDS POINTS USERNAME (MAX 10 CHARS)");
+			throw new RuntimeException("Uso: SERVER_ADDRESS PORT ROUNDS POINTS USERNAME (MAX 10 CHARS) AND PASSWORD (MAX 10 CHARS)");
+		}
+		if (serverId == "" || name == "" || password == "") {
+			throw new RuntimeException("Uso: NAME OR PASSWORD EMPTY");
+		}
+		
+		if (name.length() > 10 || password.length() > 10) {
+			throw new RuntimeException("Uso: NAME OR PASSWORD BIGGER THAN 10 CHARS");
 		}
 		
 		JFrame frame = new JFrame();
@@ -136,8 +145,8 @@ public class Client extends Thread implements Serializable {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		
-		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER, name);
-		Paddle otherPlayer = new Paddle(Definitions.OTHER_PLAYER, "");
+		Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER, name, password);
+		Paddle otherPlayer = new Paddle(Definitions.OTHER_PLAYER, "", "");
 		Panel panel = new Panel(mainPlayer, otherPlayer, new FrameCallback(frame));
 		Ball ball = new Ball(panel, mainPlayer, otherPlayer);
 		Model model = new Model(mainPlayer, otherPlayer, panel, frame, ball);
@@ -154,6 +163,7 @@ public class Client extends Thread implements Serializable {
 			System.out.println("port tcp: " + client.getLocalPort());
 			mainPlayer.connection = client;
 			GameThread gt = new GameThread(panel);
+			panel.setServerId(serverId);
 			gt.start();
 			Client sendThread = new Client(mainPlayer, otherPlayer, ball, panel, maxRounds, maxScore);
 			sendThread.start();

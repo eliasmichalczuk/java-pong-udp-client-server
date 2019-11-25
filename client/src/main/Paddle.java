@@ -22,7 +22,10 @@ public class Paddle extends Component implements PanelElement, Serializable {
 	public Socket connection;
 	public Thread udpReceive;
 	public int udpReceivePort, confirmNewGameConfig; // 2 accept, 3 refuse gameconfig
+	final int width = 10, height = 100;
+	public String name, password;
 	
+
 	public int getReceiveConnectionPort() {
 		return receiveConnectionPort;
 	}
@@ -33,6 +36,7 @@ public class Paddle extends Component implements PanelElement, Serializable {
 
 	private int playerType = Definitions.DEFAULT_PLAYER;
 	private boolean ready = false;
+	public boolean wantsLeaderBoard;
 	
 	public boolean isConnected() {
 		return this.connection != null;
@@ -98,10 +102,11 @@ public class Paddle extends Component implements PanelElement, Serializable {
 		this.y = y;
 	}
 
-	final int width = 10, height = 100;
-	public String name;
+	public void setName(String name) {
+		this.name = name;
+	}
 	
-	public Paddle(int player, String name) {
+	public Paddle(int player, String name, String password) {
 		this.name = name;
 		upAccel = false;
 		downAccel = false;
@@ -115,6 +120,7 @@ public class Paddle extends Component implements PanelElement, Serializable {
 			x = 720;
 		}
 		setVisible(true);
+		this.password = password;
 	}
 
 	public void move() {

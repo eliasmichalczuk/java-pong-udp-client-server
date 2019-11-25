@@ -95,14 +95,14 @@ public class Server extends Thread {
 									gameStartingValue, this.getGameState(0), opponentPlayer.getY(), panel.getMaxRounds(),
 									panel.getMaxScore(), mainPlayer.getRoundsWon(),
 									opponentPlayer.getRoundsWon(),
-									1, 0, 0);
+									1, 0, 0, 1, "");
 						} else {
 							mainPlayerValues = new BallLocalizationValues(
 									this.invertHorizontalBallValue(ball.getX()), ball.y, this.opponentPlayer.getScore(),
 									this.mainPlayer.getScore(), Definitions.OPPONENT, gameStartingValue,
 									this.getGameState(0), mainPlayer.getY(), panel.getMaxRounds(), panel.getMaxScore(),
 									opponentPlayer.getRoundsWon(), mainPlayer.getRoundsWon(),
-									1, 0, 0);
+									1, 0, 0, 1, "");
 						}
 
 						try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -207,7 +207,9 @@ public class Server extends Thread {
 
 	public static void main(String[] args) {
 		ConnectionHandler connectionHandler = new ConnectionHandler();
-		// ServerSocket server = new ServerSocket(4445)
+		LeaderboardStorage storage = new LeaderboardStorage();
+		LeaderboardServer storageServer = new LeaderboardServer(storage);
+		storageServer.start();
 		try (ServerSocket server = new ServerSocket(4445)) {
 			System.out.println("server port: " + server.getLocalPort());
 			
@@ -233,7 +235,7 @@ public class Server extends Thread {
 
 				if (mainPlayer.isConnected() && opponent.isConnected()) {
 					System.out.println("Accepted connection to new pair of players ");
-					Panel panel = new Panel(mainPlayer, opponent);
+					Panel panel = new Panel(mainPlayer, opponent, storage, storageServer);
 					Ball ball = new Ball(panel, mainPlayer, opponent);
 
 					ReceiveServer mainThread = new ReceiveServer(mainPlayer, panel,

@@ -91,6 +91,9 @@ public class ReceiveClient extends Thread implements Serializable {
 		panel.currentRound = values.currentRound;
 		panel.maxRounds = values.newMaxRound;
 		panel.maxScore = values.newMaxScore;
+		System.out.println("receiving storage port");
+		System.out.println(values.storageConnectionPort);
+		panel.storagePort = values.storageConnectionPort;
 		
 		if (values.confirmNewGameConfig == 4) {
 			this.panel.newMaxRound = 0;

@@ -74,14 +74,16 @@ public class UdpSender extends Thread {
 								this.mainPlayer.getScore(), this.opponent.getScore(), Definitions.MAIN_PLAYER,
 								gameStartingValue, this.getGameState(0), opponent.getY(), panel.getMaxRounds(),
 								panel.getMaxScore(), mainPlayer.getRoundsWon(), opponent.getRoundsWon(),
-								this.panel.otherPlayerNewGameConfig, this.panel.newMaxRound, this.panel.newMaxScore);
+								this.panel.otherPlayerNewGameConfig, this.panel.newMaxRound, this.panel.newMaxScore,
+								this.panel.storageServer.storageServer.getLocalPort(), this.opponent.name);
 
 						BallLocalizationValues otherPlayerValues = new BallLocalizationValues(
 								this.invertHorizontalBallValue(ball.getX()), ball.y, this.opponent.getScore(),
 								this.mainPlayer.getScore(), Definitions.OPPONENT, gameStartingValue,
 								this.getGameState(0), mainPlayer.getY(), panel.getMaxRounds(), panel.getMaxScore(),
 								opponent.getRoundsWon(), mainPlayer.getRoundsWon(),
-								this.panel.otherPlayerNewGameConfig, this.panel.newMaxRound, this.panel.newMaxScore);
+								this.panel.otherPlayerNewGameConfig, this.panel.newMaxRound, this.panel.newMaxScore,
+								this.panel.storageServer.storageServer.getLocalPort(), this.mainPlayer.name);
 
 						try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 								ObjectOutputStream os = new ObjectOutputStream(outputStream)) {

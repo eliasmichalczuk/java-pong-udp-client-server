@@ -71,6 +71,7 @@ public class UdpReceiver extends Thread {
 		panel.maxScore = values.maxScore;
 		panel.newMaxScore = values.newMaxScore;
 		panel.newMaxRound = values.newMaxRound;
+		panel.storagePort = values.storageConnectionPort;
 		
 		if (values.confirmNewGameConfig != 0) {
 			this.panel.newMaxRound = 0;
