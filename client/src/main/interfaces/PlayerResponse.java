@@ -6,15 +6,16 @@ public class PlayerResponse implements Serializable {
 	private static final long serialVersionUID = 7826643133855491865L;
 	public final int playerY, playerReceivePort;
 	public final boolean ready, wantsToPause, leavingGame, wantsRestartAfterGameEndedByValue;
-	public final int maxRounds;
-	public final int maxScore;
+	public final int maxRounds, maxScore, newMaxScore, newMaxRound;
 	public final String name;
-	public final int udpReceivePort;
+	public final int udpReceivePort, opponentConfirmedNewGameConfig;
+	public final boolean insertingNewGameConfig;
 	
 	public PlayerResponse(int playerY, boolean ready, int playerReceivePort, boolean wantsToPause,
 			boolean leavingGame, int maxRounds, int maxScore,
 			boolean wantsRestartAfterGameEndedByValue, String name,
-			int udpReceivePort) {
+			int udpReceivePort, boolean insertingNewGameConfig, int newMaxScore, int newMaxRound,
+			int opponentConfirmedNewGameConfig) {
 		this.playerY = playerY;
 		this.ready = ready;
 		this.playerReceivePort = playerReceivePort;
@@ -25,5 +26,9 @@ public class PlayerResponse implements Serializable {
 		this.wantsRestartAfterGameEndedByValue = wantsRestartAfterGameEndedByValue;
 		this.name = name;
 		this.udpReceivePort = udpReceivePort;
+		this.insertingNewGameConfig = insertingNewGameConfig;
+		this.newMaxRound = newMaxRound;
+		this.newMaxScore = newMaxScore;
+		this.opponentConfirmedNewGameConfig = opponentConfirmedNewGameConfig;
 	}
 }

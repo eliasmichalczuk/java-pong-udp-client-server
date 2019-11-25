@@ -211,5 +211,4 @@ public class Paddle implements PanelElement {
 	public void increseRoundsWon() {
 		++roundsWon;
 	}
-	
 }

@@ -89,8 +89,15 @@ public class ReceiveClient extends Thread implements Serializable {
 		this.mainPlayer.setRoundsWon(values.mainPlayerRoundsWon);
 		this.otherPlayer.setRoundsWon(values.otherPlayerRoundsWon);
 		panel.currentRound = values.currentRound;
-		panel.maxRounds = values.currentRound;
-		panel.maxScore = values.maxScore;
+		panel.maxRounds = values.newMaxRound;
+		panel.maxScore = values.newMaxScore;
+		
+		if (values.confirmNewGameConfig == 4) {
+			this.panel.newMaxRound = 0;
+			this.panel.newMaxScore = 0;
+			this.mainPlayer.confirmNewGameConfig = 0;
+			this.mainPlayer.insertingNewConfig = false;
+		}
 	}
 
 	private void handleGameState(BallLocalizationValues gameValues) {
@@ -109,6 +116,9 @@ public class ReceiveClient extends Thread implements Serializable {
 		} else if (gameValues.gameState == 8) {
 			panel.setState(8);
 			mainPlayer.setNotReady();
+		} else if (gameValues.gameState == 9) {
+			panel.setState(9);
+			this.mainPlayer.setGamePaused(true);
 		}
 	}
 }

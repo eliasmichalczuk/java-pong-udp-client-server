@@ -15,13 +15,13 @@ public class Paddle extends Component implements PanelElement, Serializable {
 	private boolean upAccel, downAccel;
 	private int player, x, y, priorYValue, score, roundsWon;
 	private boolean wantsToPause, wantToQuit, leavingGame, gamePaused;
-	public boolean wantsRestartAfterGameEndedByValue;
+	public boolean wantsRestartAfterGameEndedByValue, insertingNewConfig;
 	private Calendar timeLastReceivedValue;
 	private int sendConnectionPort = Definitions.DEFAULT_PORT_SEND;
 	private int receiveConnectionPort = Definitions.DEFAULT_PORT_RECEIVE;
 	public Socket connection;
 	public Thread udpReceive;
-	public int udpReceivePort;
+	public int udpReceivePort, confirmNewGameConfig; // 2 accept, 3 refuse gameconfig
 	
 	public int getReceiveConnectionPort() {
 		return receiveConnectionPort;
@@ -150,6 +150,11 @@ public class Paddle extends Component implements PanelElement, Serializable {
 	public void setDownAccel(boolean input) {
 		downAccel = input;
 	}
+	
+	public void insertGameConfig() {
+		insertingNewConfig = true;
+	}
+
 
 	public int getY() {
 		return (int)y;
@@ -225,6 +230,14 @@ public class Paddle extends Component implements PanelElement, Serializable {
 
 	public void setNotReady() {
 		this.ready = false;
+	}
+
+	public void accepNewGameConfig() {
+		this.confirmNewGameConfig = 2;
+	}
+	
+	public void refuseNewGameConfig() {
+		this.confirmNewGameConfig = 3;
 	}
 	
 }

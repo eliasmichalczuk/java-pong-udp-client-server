@@ -9,9 +9,12 @@ import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
+import java.nio.charset.MalformedInputException;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -23,11 +26,12 @@ public class Panel extends JPanel{
 	final int width = 750, height = 400;
 	Rectangle bounds;
 	
-	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting, 7 ended by max score, 8 other player left, waiting for opponent
+	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player,
+	// 5 starting, 7 ended by max score, 8 other player left, waiting for opponent
 	private int state = 0;
 	private int gameStartingValue = 0;
 	
-	private boolean enterPressed = false;
+	private boolean enterPressed = false, insertingGameConfig;
 	public int maxRounds, maxScore, currentRound;
 
 	public int getState() {
@@ -43,6 +47,8 @@ public class Panel extends JPanel{
 	private Paddle mainPlayer;
 	private FrameCallback frameCallback;
 	private JTextField textfield;
+	public int newMaxRound, newMaxScore;
+	public int cacheNewMaxRound, cacheNewMaxScore;
 	
 	public Panel(Paddle mainPlayer, Paddle otherPlayer, FrameCallback frameCallback) {
 		this.mainPlayer = mainPlayer;
@@ -116,10 +122,25 @@ public class Panel extends JPanel{
         } else if (state == 8) {
     		g.drawString("Opponent disconnected. Waiting for another one.", 150, 120);
         	g.drawString("Press L to leave game", 350, 220);
-        }
+        } else if (state == 9 && this.mainPlayer.insertingNewConfig) {
+      		g.drawString("Change rounds and points for this game.", 150, 100);
+        	g.drawString("Amount of rounds, press enter. Max score, press enter.", 50, 130);
+        	g.drawString("0 to cancel.", 350, 250);
+        } else if (state == 9 && !this.mainPlayer.insertingNewConfig) {
+    		if (this.newMaxRound > 0) {
+    			if (cacheNewMaxRound == 0 ) {
+        			this.cacheNewMaxRound = newMaxRound;
+        			this.cacheNewMaxScore = newMaxScore;
+    			}
 
-        
-        
+    			g.drawString("Do you accept the values for Rounds and Score", 150, 100);
+    			g.drawString(this.cacheNewMaxRound + " and " + this.cacheNewMaxScore, 250, 120);
+    			g.drawString("V to accept new config", 250, 140);
+    			g.drawString("B to refuse new config", 250, 160);
+    		} else {
+    			g.drawString("Opponent is changing max rounds and max score", 150, 100);
+    		}
+        }
     }
 	
 	private void setGameInitialized(Graphics g) {
@@ -173,6 +194,12 @@ public class Panel extends JPanel{
 		mainPlayer.setWantsToPause(false);
 		mainPlayer.setReady();
 		this.mainPlayer.wantsRestartAfterGameEndedByValue = true;
+	}
+
+	public void insertGameConfig() {
+		this.newMaxRound = 0;
+		this.newMaxScore = 0;
+		this.mainPlayer.insertingNewConfig = true;
 	}
 
 }

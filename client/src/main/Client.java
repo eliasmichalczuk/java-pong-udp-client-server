@@ -14,6 +14,8 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Calendar;
+import java.util.InputMismatchException;
+import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.JTextField;
@@ -32,6 +34,7 @@ public class Client extends Thread implements Serializable {
 	private final int port = 4446;
 	public  int maxRounds;
 	public int maxScore;
+	public NewGameConfig threadConfig;
 
 	public Client(Paddle mainPlayer, Paddle otherPlayer, Ball ball, Panel panel, int maxRounds, int maxScore) {
 		this.mainPlayer = mainPlayer;
@@ -57,13 +60,14 @@ public class Client extends Thread implements Serializable {
 							mainPlayer.getTimeLastReceivedValue().get(Calendar.SECOND) > 3
 							&& !mainPlayer.isLeavingGame()) {
 					}
-					
-//					while (mainPlayer.getReceiveConnectionPort() == 0) {
-//						Client.sleep(20);
-//					}
-					
+
 					if (!mainPlayer.isReady()) {
 						Client.sleep(100);
+					}
+					
+					if (this.mainPlayer.insertingNewConfig && this.threadConfig == null) {
+						this.threadConfig = new NewGameConfig(panel, this.mainPlayer);
+						this.threadConfig.start();
 					}
 			
 					os = new ObjectOutputStream(outputStream);
@@ -73,25 +77,29 @@ public class Client extends Thread implements Serializable {
 							mainPlayer.doesWantToPause(),
 							mainPlayer.isLeavingGame(), maxRounds, maxScore,
 							mainPlayer.wantsRestartAfterGameEndedByValue,
-							mainPlayer.name, this.mainPlayer.udpReceivePort);
+							mainPlayer.name, this.mainPlayer.udpReceivePort,
+							this.mainPlayer.insertingNewConfig,
+							this.panel.newMaxRound, this.panel.newMaxScore,
+							this.mainPlayer.confirmNewGameConfig);
 					os.writeObject(request);
 					byte[] obj = outputStream.toByteArray();
 
-//					DatagramPacket playerRequestPacket = new DatagramPacket(obj, obj.length, address, port);
 					out.write(obj);
 					out.flush();
+					
+					if (request.opponentConfirmedNewGameConfig != 0) {
+						this.mainPlayer.confirmNewGameConfig = 0;
+					}
 				} catch (SocketException e) {
 					System.out.println("Server closed ");
 					break;
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				Thread.sleep(20);
 				Thread.yield();
 			}
 		} catch (SocketException | InterruptedException e2) {
-			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		} catch (IOException e) {
 			System.out.println("Erro ao tentar enviar ao servidor ");
@@ -116,10 +124,8 @@ public class Client extends Thread implements Serializable {
 			System.out.println(args[1]);
 			System.out.println(args[2]);
 			System.out.println(args[3]);
-
-		} catch (RuntimeException ex) {
-			System.err.println("Uso: SERVER_ADDRESS PORT ROUNDS POINTS");
-			return;
+		} catch (Exception ex) {
+			throw new RuntimeException("Uso: SERVER_ADDRESS PORT ROUNDS POINTS USERNAME (MAX 10 CHARS)");
 		}
 		
 		JFrame frame = new JFrame();

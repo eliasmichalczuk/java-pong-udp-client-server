@@ -49,7 +49,7 @@ public class Ball implements PanelElement {
 	
 	private void move() {
 		
-		if (game.getState() == 2 || game.getState() == 7 || game.getState() == 3) {
+		if (game.getState() == 2 || game.getState() == 7 || game.getState() == 3 || game.getState() == 9) {
 			return;
 		}
 		

@@ -41,7 +41,6 @@ public class UdpReceiver extends Thread {
 						ByteArrayInputStream in = new ByteArrayInputStream(responsePacket.getData());
 						ObjectInputStream is = new ObjectInputStream(in);
 						BallLocalizationValues gameValues = (BallLocalizationValues) is.readObject();
-
 						this.handleGameState(gameValues);
 						this.setLocalValues(gameValues);
 						mainPlayer.setTimeLastReceivedValue(Calendar.getInstance());
@@ -70,6 +69,14 @@ public class UdpReceiver extends Thread {
 		panel.currentRound = values.currentRound;
 		panel.maxRounds = values.currentRound;
 		panel.maxScore = values.maxScore;
+		panel.newMaxScore = values.newMaxScore;
+		panel.newMaxRound = values.newMaxRound;
+		
+		if (values.confirmNewGameConfig != 0) {
+			this.panel.newMaxRound = 0;
+			this.panel.newMaxScore = 0;
+			this.mainPlayer.insertingNewConfig = false;
+		}
 	}
 
 	private void handleGameState(BallLocalizationValues gameValues) {
@@ -79,6 +86,8 @@ public class UdpReceiver extends Thread {
 			this.panel.gameStarting(gameValues.gameStartingValue);
 		} else if (gameValues.gameState == 1) {
 			mainPlayer.wantsRestartAfterGameEndedByValue = false;
+			mainPlayer.insertingNewConfig = false;
+			mainPlayer.confirmNewGameConfig = 0;
 			this.panel.gameRunning();
 		} else if (gameValues.gameState == 2) {
 			panel.setState(2);
@@ -88,6 +97,9 @@ public class UdpReceiver extends Thread {
 		} else if (gameValues.gameState == 8) {
 			panel.setState(8);
 			mainPlayer.setNotReady();
-		}
+		} else if (gameValues.gameState == 9) {
+			panel.setState(9);
+			this.mainPlayer.setGamePaused(true);
+		} 
 	}
 }

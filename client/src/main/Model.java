@@ -34,17 +34,12 @@ public class Model implements KeyListener, ActionListener  {
 	@Override
 	public void keyTyped(KeyEvent e) {
 		mainPlayer.move();
-//		panel.repaint();
 	}
 
 	private void attach() {
 		this.panel.addChildrenElement(mainPlayer);
 		this.panel.addChildrenElement(otherPlayer);
 		this.panel.addChildrenElement(ball);
-//		this.panel.add(mainPlayer);
-//		this.panel.add(otherPlayer);
-//		this.panel.add(ball);
-//		this.panel.add(textfield);
 		frame.addKeyListener(this);
 	}
 	
@@ -73,6 +68,18 @@ public class Model implements KeyListener, ActionListener  {
 		
 		if (e.getKeyCode() == KeyEvent.VK_S) {
 			mainPlayer.setDownAccel(true);
+		}
+		
+		if (e.getKeyCode() == KeyEvent.VK_G) {
+			panel.insertGameConfig();
+		}
+		
+		if (e.getKeyCode() == KeyEvent.VK_V) {
+			mainPlayer.accepNewGameConfig();
+		}
+		
+		if (e.getKeyCode() == KeyEvent.VK_B) {
+			mainPlayer.refuseNewGameConfig();
 		}
 		
 		if (e.getKeyCode() == KeyEvent.VK_X && this.panel.getState() == 7) {

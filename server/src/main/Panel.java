@@ -3,20 +3,29 @@ package main;
 import java.util.ArrayList;
 import java.util.List;
 
+import main.interfaces.PlayerResponse;
+
 public class Panel {
 	
 	final int width = 750, height = 400;
-	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player, 5 starting, 7 game ended by max score, 8 opponent left
+	// 0 justStarted, 1 running, 2 paused, 3 ended, 4 waiting for player,
+	// 5 starting, 7 game ended by max score, 8 opponent left, 9 changing game config
 	private int state = 0;
 	private int playerType = 0;
 	private int maxRounds, maxScore, currentRound = 1;
+	public int newMaxRound, newMaxScore;
+	private List<PanelElement> children = new ArrayList<PanelElement>();
+	private Paddle otherPlayer;
+	private Paddle mainPlayer;
+	public int otherPlayerNewGameConfig; // 2 confirmed, 3 refused, 4 restarting server config
+	public boolean changedGameConfig;
 	
 	public int getState() {
 		return state;
 	}
 	
-	public void pauseGame(int playerType) {
-		this.setState(2);
+	public void pauseGame(int playerType, int option) {
+		this.setState(option);
 		this.playerType = playerType; 
 	}
 	
@@ -26,14 +35,10 @@ public class Panel {
 			this.playerType = 0;
 		}
 	}
-
+	
 	public void setState(int state) {
 		this.state = state;
 	}
-
-	private List<PanelElement> children = new ArrayList<PanelElement>();
-	private Paddle otherPlayer;
-	private Paddle mainPlayer;
 	
 	public Panel(Paddle mainPlayer, Paddle otherPlayer) {
 		this.mainPlayer = mainPlayer;
@@ -96,6 +101,8 @@ public class Panel {
 		mainPlayer.reset();
 		otherPlayer.reset();
 		currentRound = 1;
+		newMaxRound = 0;
+		newMaxScore = 0;
 		state = Definitions.STATE_STARTING_GAME;
 	}
 	
@@ -104,6 +111,26 @@ public class Panel {
 		otherPlayer.reset();
 		currentRound = 1;
 		state = 0;
+		newMaxRound = 0;
+		newMaxScore = 0;
 	}
 
+	public void unPauseGameNewGameConfig(PlayerResponse playerResponseValues, Paddle player) {
+		if (state == 9 && this.playerType == player.getPlayerType()) {
+			setState(5);
+			this.playerType = 0;
+		}
+	}
+
+	public void resetGameAfterNewGameState(PlayerResponse playerResponseValues, Paddle player) {
+		this.playerType = 0;
+		this.setState(5);
+		this.otherPlayerNewGameConfig = 4;
+		this.changedGameConfig = true;
+	}
+	
+	public void setPlayersReady() {
+		this.mainPlayer.setReady();
+		this.otherPlayer.setReady();
+	}
 }

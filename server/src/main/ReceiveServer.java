@@ -9,6 +9,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,7 +20,6 @@ public class ReceiveServer extends Thread {
 
 	private final Logger audit = Logger.getLogger("requests");
 	private final Logger errors = Logger.getLogger("errors");
-
 	private Paddle player;
 	private Panel panel;
 	private PlayerActionsHandler handler;
@@ -45,16 +45,6 @@ public class ReceiveServer extends Thread {
 							playerResponseValues = (PlayerResponse) is.readObject();
 						} catch (SocketException | NullPointerException e) {
 							e.printStackTrace();
-							
-//							while (this.player.connection != null && !this.player.connection.isClosed()) {
-//								try {
-//									player.toString();
-//									System.out.println("player not connected...");
-//									Thread.sleep(200);
-//								} catch (InterruptedException e1) {
-//									e1.printStackTrace();
-//								}
-//							}
 							break;
 						}
 						this.player.udpSendPort = playerResponseValues.udpReceivePort;
@@ -74,11 +64,36 @@ public class ReceiveServer extends Thread {
 							this.panel.unPauseGame(player.getPlayerType());
 						}
 						if (playerResponseValues.wantsToPause) {
-							this.panel.pauseGame(player.getPlayerType());
+							this.panel.pauseGame(player.getPlayerType(), 2);
 						}
+						
+						if (this.panel.getState() != 5 && !this.panel.changedGameConfig) {
+							if (playerResponseValues.insertingNewGameConfig
+									&& this.panel.otherPlayerNewGameConfig != 0) {
+								
+							} else {
+								if (!playerResponseValues.insertingNewGameConfig) {
+									this.panel.unPauseGameNewGameConfig(playerResponseValues, player);
+								}
+								
+								if (playerResponseValues.insertingNewGameConfig
+										&& !(this.panel.otherPlayerNewGameConfig == 2 || this.panel.otherPlayerNewGameConfig == 3)) {
+									this.panel.pauseGame(player.getPlayerType(), 9);
+									this.panel.newMaxScore = playerResponseValues.newMaxScore;
+									this.panel.newMaxRound = playerResponseValues.newMaxRound;
+									this.panel.otherPlayerNewGameConfig = 0;
+									this.panel.setState(9);
+								}
+								
+								if (!playerResponseValues.insertingNewGameConfig) {
+									this.verifyPlayerConfig(playerResponseValues);	
+								}
+							}
 
+						}
 						player.setY(playerResponseValues.playerY);
 						player.name = playerResponseValues.name;
+		
 					} catch (RuntimeException e) {
 						e.printStackTrace();
 					} catch (SocketException e) {
@@ -86,15 +101,6 @@ public class ReceiveServer extends Thread {
 						break;
 					} catch (ClassNotFoundException e) {
 						e.printStackTrace();
-//					} catch (Exception e) {
-//						while (!this.player.isConnected()) {
-//							try {
-//								System.out.println("player not connected...");
-//								Thread.sleep(200);
-//							} catch (InterruptedException e1) {
-//								e1.printStackTrace();
-//							}
-//						}
 					}
 					Thread.yield();
 				}
@@ -104,5 +110,24 @@ public class ReceiveServer extends Thread {
 				break;
 			}
 		}
+	}
+
+	private void verifyPlayerConfig(PlayerResponse playerResponseValues) {
+		if (playerResponseValues.insertingNewGameConfig) {
+			return;
+		}
+		if (this.panel.newMaxRound == 0 || this.panel.newMaxScore == 0) {
+			return;
+		}
+		if (playerResponseValues.opponentConfirmedNewGameConfig == 2) {
+			this.panel.setMaxRounds(this.panel.newMaxRound);
+			this.panel.setMaxScore(this.panel.newMaxScore);
+			this.panel.setZeroState();
+			this.panel.setPlayersReady();
+			this.panel.resetGameAfterNewGameState(playerResponseValues, player);
+		} else if (playerResponseValues.opponentConfirmedNewGameConfig == 3) {
+			this.panel.resetGameAfterNewGameState(playerResponseValues, player);
+		}
+		
 	}
 }

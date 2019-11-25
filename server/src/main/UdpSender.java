@@ -20,6 +20,7 @@ public class UdpSender extends Thread {
 	private int gameStartingValue = 0;
 	private int calendarSeconds;
 	private Calendar calendar;
+
 	private boolean countStarted = false;
 	private Ball ball;
 	private Paddle mainPlayer;
@@ -45,6 +46,7 @@ public class UdpSender extends Thread {
 		this.panel.setState(1);
 		this.ball.reset();
 		this.countStarted = false;
+		this.panel.otherPlayerNewGameConfig = 0;
 	}
 
 	@Override
@@ -71,13 +73,15 @@ public class UdpSender extends Thread {
 						BallLocalizationValues mainPlayerValues = new BallLocalizationValues((int) ball.getX(), ball.y,
 								this.mainPlayer.getScore(), this.opponent.getScore(), Definitions.MAIN_PLAYER,
 								gameStartingValue, this.getGameState(0), opponent.getY(), panel.getMaxRounds(),
-								panel.getMaxScore(), mainPlayer.getRoundsWon(), opponent.getRoundsWon());
+								panel.getMaxScore(), mainPlayer.getRoundsWon(), opponent.getRoundsWon(),
+								this.panel.otherPlayerNewGameConfig, this.panel.newMaxRound, this.panel.newMaxScore);
 
 						BallLocalizationValues otherPlayerValues = new BallLocalizationValues(
 								this.invertHorizontalBallValue(ball.getX()), ball.y, this.opponent.getScore(),
 								this.mainPlayer.getScore(), Definitions.OPPONENT, gameStartingValue,
 								this.getGameState(0), mainPlayer.getY(), panel.getMaxRounds(), panel.getMaxScore(),
-								opponent.getRoundsWon(), mainPlayer.getRoundsWon());
+								opponent.getRoundsWon(), mainPlayer.getRoundsWon(),
+								this.panel.otherPlayerNewGameConfig, this.panel.newMaxRound, this.panel.newMaxScore);
 
 						try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 								ObjectOutputStream os = new ObjectOutputStream(outputStream)) {
@@ -160,7 +164,7 @@ public class UdpSender extends Thread {
 			}
 			if (gameStartingValue == 0) {
 				this.startGame();
-
+				
 			}
 		}
 	}
@@ -168,6 +172,8 @@ public class UdpSender extends Thread {
 	private int getGameState(int port) {
 		if (panel.getState() == 8) {
 			return 8;
+		} else if (panel.getState() == 9) {
+			return 9;
 		} else if (!mainPlayer.isReady() || !opponent.isReady()) {
 			// waiting
 			return 4;
@@ -187,6 +193,6 @@ public class UdpSender extends Thread {
 
 	public int invertHorizontalBallValue(int x) {
 		int width = this.panel.width;
-		return width - x;
+		return (width - x) - 30;
 	}
 }

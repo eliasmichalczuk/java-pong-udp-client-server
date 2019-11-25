@@ -93,13 +93,16 @@ public class Server extends Thread {
 							mainPlayerValues = new BallLocalizationValues((int) ball.getX(), ball.y,
 									this.mainPlayer.getScore(), this.opponentPlayer.getScore(), Definitions.MAIN_PLAYER,
 									gameStartingValue, this.getGameState(0), opponentPlayer.getY(), panel.getMaxRounds(),
-									panel.getMaxScore(), mainPlayer.getRoundsWon(), opponentPlayer.getRoundsWon());
+									panel.getMaxScore(), mainPlayer.getRoundsWon(),
+									opponentPlayer.getRoundsWon(),
+									1, 0, 0);
 						} else {
 							mainPlayerValues = new BallLocalizationValues(
 									this.invertHorizontalBallValue(ball.getX()), ball.y, this.opponentPlayer.getScore(),
 									this.mainPlayer.getScore(), Definitions.OPPONENT, gameStartingValue,
 									this.getGameState(0), mainPlayer.getY(), panel.getMaxRounds(), panel.getMaxScore(),
-									opponentPlayer.getRoundsWon(), mainPlayer.getRoundsWon());
+									opponentPlayer.getRoundsWon(), mainPlayer.getRoundsWon(),
+									1, 0, 0);
 						}
 
 						try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
