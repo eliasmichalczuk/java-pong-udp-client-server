@@ -109,29 +109,29 @@ public class UdpSender extends Thread {
 
 				errors.log(Level.SEVERE, e.getMessage(), e);
 			}
-			if (!mainPlayer.isConnected() && !opponent.isConnected()) {
+			if (!mainPlayer.connectedOrHandled() && !opponent.connectedOrHandled()) {
 				break;
 			}
 		}
 	}
 
 	private void handleConnections() {
-		if (!this.mainPlayer.connectionExists() && !this.opponent.connectionExists()) {
-			throw new RuntimeException("Both players: " + this.mainPlayer.name + " and " + this.opponent.name + " left the game");
-		}
-		if (!this.mainPlayer.isConnected()) {
+//		if (!this.mainPlayer.actuallyConnected() && !this.opponent.actuallyConnected()) {
+//			throw new RuntimeException("Both players: " + this.mainPlayer.name + " and " + this.opponent.name + " left the game");
+//		}
+		if (!this.mainPlayer.connectedOrHandled()) {
 			this.mainPlayer.connectionBeingHandled = true;
 			UdpConnectionCallback cb = new UdpConnectionCallback(panel, mainPlayer, opponent, connectionHandler,
-					this.ball);
+					this.ball, this);
 			System.out.println("Player disconnected, name " + this.mainPlayer.name);
 			new Thread(cb).start();
 			this.mainReceiveThread.interrupt();
 			this.panel.setState(8);
 			this.opponent.notReady();
-		} else if (!this.opponent.isConnected()) {
+		} else if (!this.opponent.connectedOrHandled()) {
 			this.opponent.connectionBeingHandled = true;
 			UdpConnectionCallback cb = new UdpConnectionCallback(panel, opponent, mainPlayer, connectionHandler,
-					this.ball);
+					this.ball, this);
 			System.out.println("Player disconnected, name " + this.opponent.name);
 			new Thread(cb).start();
 			this.oppoReceiveThread.interrupt();

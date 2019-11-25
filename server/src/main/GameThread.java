@@ -13,7 +13,7 @@ public class GameThread extends Thread {
 	@Override
 	public void run() {
 
-		while (true) {
+		while (!this.panel.gameThreadMayShutDown) {
 	        
 			if (panel.getState() == 0 || panel.getState() == 4 || panel.getState() == 7 || panel.getState() == 3) {
 	        	sleepTime = 40;

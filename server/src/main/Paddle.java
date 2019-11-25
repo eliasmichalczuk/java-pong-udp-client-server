@@ -14,6 +14,10 @@ public class Paddle implements PanelElement {
 	public Socket connection;
 	private int playerType = Definitions.DEFAULT_PLAYER;
 	private boolean ready = false;
+	final int width = 10, height = 100;
+	public String name;
+	private String uuid;
+	public boolean otherConnectedPlayerMovedPanel;
 	public int udpSendPort;
 	public UdpSender udpSender;
 	public boolean connectionBeingHandled;
@@ -46,11 +50,11 @@ public class Paddle implements PanelElement {
 		this.ready = false;
 	}
 
-	public boolean isConnected() {
+	public boolean connectedOrHandled() {
 		return (this.connection != null && !this.connection.isClosed()) || this.connectionBeingHandled;
 	}
 
-	public boolean connectionExists() {
+	public boolean actuallyConnected() {
 		return this.connection != null && !this.connection.isClosed();
 	}
 	
@@ -93,12 +97,8 @@ public class Paddle implements PanelElement {
 	public void setY(int y) {
 		this.y = y;
 	}
-
-	final int width = 10, height = 100;
-	public String name;
-	private UUID uuid;
 	
-	public UUID getUuid() {
+	public String getUuid() {
 		return uuid;
 	}
 
@@ -111,7 +111,7 @@ public class Paddle implements PanelElement {
 			x = 720;
 		}
 		this.reset();
-		this.uuid = UUID.randomUUID();
+		this.uuid = UUID.randomUUID().toString();
 	}
 
 	@Override
@@ -188,10 +188,7 @@ public class Paddle implements PanelElement {
 	
 	@Override
 	public String toString() {
-		return "Paddle  [ NAME = " + name + "yVel=" + yVel + ", upAccel=" + upAccel + ", downAccel=" + downAccel + ", player=" + player
-				+ ", x=" + x + ", y=" + y + ", priorYValue=" + priorYValue + ", score=" + score + ", roundsWon="
-				+ roundsWon + ", playerType=" + playerType + ", ready=" + ready
-				+ ", width=" + width + ", height=" + height + "]";
+		return "Paddle  [ NAME= " + name +  " uuid= " + uuid + "]";
 	}
 
 	public void reset() {

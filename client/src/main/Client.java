@@ -118,13 +118,13 @@ public class Client extends Thread implements Serializable {
 			System.out.println(args[3]);
 
 		} catch (RuntimeException ex) {
-			System.err.println("Uso: SERVER_ADDRESS PORT ROUNDS POINTS");
+			System.err.println("Uso: SERVER_ADDRESS PORT ROUNDS POINTS PLAYER_NAME");
 			return;
 		}
 		
 		JFrame frame = new JFrame();
 		frame.setSize(750, 400);
-		frame.setTitle("Java UDP Multiclient Pong Game");
+		frame.setTitle("Java TCP-UDP Multiclient Pong Game");
 		frame.setBackground(Color.BLACK);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

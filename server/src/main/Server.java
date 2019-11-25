@@ -25,7 +25,9 @@ import java.nio.channels.SocketChannel;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -78,13 +80,13 @@ public class Server extends Thread {
 		while (true) {
 			try (DataOutputStream outMain = new DataOutputStream(this.mainPlayer.connection.getOutputStream())) {
 				this.panel.setZeroState();
-				while (this.mainPlayer.isConnected()) {
+				while (this.mainPlayer.connectedOrHandled()) {
 					gameStartCountdown();
 					Thread.sleep(20);
 					BallLocalizationValues mainPlayerValues = null;
 					try {
 						
-						if (!this.opponentPlayer.isConnected()) {
+						if (!this.opponentPlayer.connectedOrHandled()) {
 							this.panel.setState(8);
 							this.mainPlayer.notReady();
 						}
@@ -213,22 +215,22 @@ public class Server extends Thread {
 			while (true) {
 				
 				Socket newConnectionSocket = server.accept();
-				if (!mainPlayer.isConnected() || !opponent.isConnected()) {
+				if (!mainPlayer.connectedOrHandled() || !opponent.connectedOrHandled()) {
 					if (!connectionHandler.disconnectedPlayers.isEmpty()) {
 						connectionHandler.disconnectedPlayers.get(0).connection = newConnectionSocket;
 						System.out.println("accepted connection from new player ");
 						connectionHandler.disconnectedPlayers.remove(0);
 					}
-					else if (!mainPlayer.isConnected()) {
+					else if (!mainPlayer.connectedOrHandled()) {
 						mainPlayer.connection = newConnectionSocket;
 						System.out.println("Accepted connection mainP " + mainPlayer.toString());
-					} else if (!opponent.isConnected()) {
+					} else if (!opponent.connectedOrHandled()) {
 						opponent.connection = newConnectionSocket;
 						System.out.println("Accepted connection opponent " + mainPlayer.toString());
 					}
 				}
 
-				if (mainPlayer.isConnected() && opponent.isConnected()) {
+				if (mainPlayer.connectedOrHandled() && opponent.connectedOrHandled()) {
 					System.out.println("Accepted connection to new pair of players ");
 					Panel panel = new Panel(mainPlayer, opponent);
 					Ball ball = new Ball(panel, mainPlayer, opponent);
@@ -241,6 +243,7 @@ public class Server extends Thread {
 							new PlayerActionsHandler(opponent, panel));
 					oppoThread.start();
 
+					connectionHandler.addNewGamePanel(panel);
 					Server sendThread = new Server(ball, mainPlayer, opponent,panel, mainThread, connectionHandler);
 					UdpSender udpSenderMain = new UdpSender(ball, mainPlayer, opponent,panel, mainThread, oppoThread, connectionHandler);
 					Server oppoSendThread = new Server(ball, opponent, mainPlayer,panel, oppoThread, connectionHandler);

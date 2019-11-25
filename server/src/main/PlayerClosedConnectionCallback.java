@@ -30,11 +30,11 @@ public class PlayerClosedConnectionCallback implements Runnable {
 		connectedPlayer.reset();
 		disconnectedPlayer.reset();
 		System.out.println("Esperando por novo jogador conectar na partida...");
-		this.connectionHandler.disconnectedPlayers.add(disconnectedPlayer);
+		this.connectionHandler.addDisConnectedPlayer(disconnectedPlayer);
 
-		while (disconnectedPlayer.connection == null || !disconnectedPlayer.isConnected()) {
-			if (!connectedPlayer.isConnected()) {
-				this.connectionHandler.disconnectedPlayers.remove(connectedPlayer);
+		while (disconnectedPlayer.connection == null || !disconnectedPlayer.connectedOrHandled()) {
+			if (!connectedPlayer.connectedOrHandled()) {
+				this.connectionHandler.removeDisConnectedPlayer(connectedPlayer);
 				throw new RuntimeException("Other player not connected anymore. Goodbye. ");
 			}
 			try {
