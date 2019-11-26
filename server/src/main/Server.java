@@ -208,7 +208,7 @@ public class Server extends Thread {
 	public static void main(String[] args) {
 		ConnectionHandler connectionHandler = new ConnectionHandler();
 		// ServerSocket server = new ServerSocket(4445)
-		try (ServerSocket server = new ServerSocket(4445)) {
+		try (ServerSocket server = new ServerSocket(0)) {
 			System.out.println("server port: " + server.getLocalPort());
 			
 			Paddle mainPlayer = new Paddle(Definitions.MAIN_PLAYER);
